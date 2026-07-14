@@ -1,0 +1,30 @@
+# ── Personal resume data ──────────────────────────────────────────────────────
+# Your real resume data lives here and is NEVER committed.
+# Use data/resume.example.yaml as a template.
+data/resume.yaml
+
+# ── Generated PDF output ──────────────────────────────────────────────────────
+# PDFs built from real personal data must not be committed.
+# Gitignoring all output PDFs is the safest default.
+# If you want to version-control demo PDFs (built from resume.example.yaml),
+# you can remove this line and manually commit only those files.
+output/*.pdf
+
+# ── Python artefacts ─────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+
+# ── Virtual environments ──────────────────────────────────────────────────────
+venv/
+.venv/
+env/
+
+# ── macOS ─────────────────────────────────────────────────────────────────────
+.DS_Store
+
+# ── IDE / editor ──────────────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.swp
+*.swo

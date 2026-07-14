@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+jobs:
+  test-and-smoke:
+    name: Pytest + Smoke Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      # ── Checkout ────────────────────────────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ── Python setup ────────────────────────────────────────────────────────
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      # ── Install dependencies ─────────────────────────────────────────────────
+      # requirements.txt covers runtime deps; pytest is listed there too.
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      # ── Unit tests ───────────────────────────────────────────────────────────
+      - name: Run pytest suite
+        run: pytest tests/ -v --tb=short
+
+      # ── Smoke tests ──────────────────────────────────────────────────────────
+      # compile_resume.py falls back to data/resume.example.yaml automatically
+      # when data/resume.yaml is absent (which it always is in CI — gitignored).
+      # The --output flag writes to /tmp to avoid any git-staging side-effects.
+      - name: Smoke test — backend target
+        run: |
+          python compile_resume.py \
+            --target backend \
+            --output /tmp/resume_backend_ci.pdf
+
+      - name: Smoke test — data-science target
+        run: |
+          python compile_resume.py \
+            --target data-science \
+            --output /tmp/resume_ds_ci.pdf
+
+      - name: Smoke test — frontend target
+        run: |
+          python compile_resume.py \
+            --target frontend \
+            --output /tmp/resume_frontend_ci.pdf
+
+      # ── List-targets sanity check ────────────────────────────────────────────
+      - name: Smoke test — list-targets
+        run: python compile_resume.py --list-targets
+
+      - name: Smoke test — targets-report
+        run: python compile_resume.py --targets-report

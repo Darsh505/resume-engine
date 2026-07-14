@@ -1,0 +1,256 @@
+##############################################################
+# resume.example.yaml — Example resume data for the Git-Driven Resume Engine.
+#
+# This file contains FICTIONAL data.  It exists so:
+#   (a) CI and demos work without any personal information, and
+#   (b) new users have a realistic template to copy and fill in.
+#
+# Setup:
+#   cp data/resume.example.yaml data/resume.yaml
+#   # Edit data/resume.yaml with your real information.
+#   # data/resume.yaml is gitignored and will never be committed.
+#
+# Tag reference:
+#   backend      — server-side / API / infrastructure roles
+#   frontend     — client-side / UI roles
+#   data-science — ML / analytics / data engineering roles
+#   devops       — CI-CD / cloud / platform / SRE roles
+#   general      — always included regardless of target
+#
+# Priority field (optional, integer):
+#   Higher numbers surface an item earlier within its section.
+#   Missing priority defaults to 0.  Only add it where order matters.
+##############################################################
+
+personal:
+  name: "Jordan Rivera"
+  email: "jordan.rivera@example.com"
+  phone: "+1 (555) 012-3456"
+  linkedin: "linkedin.com/in/jordanrivera-example"
+  github: "github.com/jordanrivera-example"
+  website: "jordanrivera.example.com"
+
+# ─────────────────────────────────────────
+education:
+  - institution: "Midwestern State University"
+    degree: "B.S. Computer Science"
+    dates: "Aug 2017 – May 2021"
+    gpa: "3.75 / 4.0"
+    coursework:
+      - name: "Data Structures & Algorithms"
+        tags: [general]
+      - name: "Database Systems"
+        tags: [backend, data-science]
+      - name: "Machine Learning"
+        tags: [data-science]
+      - name: "Operating Systems"
+        tags: [backend, devops]
+      - name: "Computer Networks"
+        tags: [backend, devops]
+      - name: "Web Technologies"
+        tags: [frontend]
+      - name: "Statistical Learning"
+        tags: [data-science]
+      - name: "Distributed Systems"
+        tags: [backend, devops]
+
+# ─────────────────────────────────────────
+experience:
+  - company: "Acme Payment Systems"
+    role: "Senior Software Engineer"
+    dates: "Jun 2021 – Present"
+    location: "Chicago, IL"
+    bullets:
+      # priority: 2 → this bullet floats to the top for any backend compile
+      - text: "Designed a high-throughput transaction idempotency layer handling 80K+ ops/sec using Redis and PostgreSQL, reducing duplicate processing by 99.9%."
+        tags: [backend, general]
+        priority: 2
+
+      - text: "Re-architected the payment routing service as a gRPC microservice, reducing average API latency from 310ms to 62ms."
+        tags: [backend]
+        priority: 1
+
+      - text: "Built a real-time fraud signal pipeline using Kafka + Flink, feeding 30+ ML model features with sub-200ms end-to-end latency."
+        tags: [backend, data-science]
+
+      - text: "Led migration of monolithic billing service to event-driven architecture (Kafka), improving deployment frequency from monthly to daily."
+        tags: [backend, devops]
+
+      - text: "Authored internal SDK for two partner integrations, abstracting OAuth 2.0 flows and webhook verification."
+        tags: [backend]
+
+      - text: "Mentored 3 junior engineers; conducted 60+ code reviews; wrote the team's API design guidelines."
+        tags: [general]
+
+  - company: "DataStream Analytics"
+    role: "Data Engineering Intern"
+    dates: "May 2020 – Aug 2020"
+    location: "Remote"
+    bullets:
+      # priority: 1 → surfaces this bullet above equal-scored peers for data-science
+      - text: "Developed an automated ELT pipeline in Apache Airflow + dbt to ingest and model 6 TB/day of event data into Snowflake."
+        tags: [data-science, backend]
+        priority: 1
+
+      - text: "Built an anomaly detection module using Isolation Forest, flagging 91% of data-quality incidents before dashboard review."
+        tags: [data-science]
+
+      - text: "Reduced Spark job runtime by 55% via partition pruning and broadcast join optimizations across 12 production DAGs."
+        tags: [data-science, backend]
+
+      - text: "Created Tableau dashboards for supply/demand forecasting, adopted by two regional operations teams."
+        tags: [data-science]
+
+      - text: "Containerized all Airflow tasks with Docker and deployed via Kubernetes on GKE."
+        tags: [devops, backend]
+
+  - company: "BrightPixel Agency"
+    role: "Frontend Developer (Contract)"
+    dates: "Jan 2020 – Apr 2020"
+    location: "Remote"
+    bullets:
+      - text: "Built a reusable React component library (22 components) using TypeScript and Storybook, adopted across 3 internal products."
+        tags: [frontend]
+
+      - text: "Implemented responsive layouts and WCAG 2.1 AA accessibility improvements, reducing reported a11y issues by 71%."
+        tags: [frontend, general]
+
+      - text: "Integrated GraphQL subscriptions for real-time updates, eliminating 9 REST polling endpoints."
+        tags: [frontend, backend]
+
+      - text: "Optimized bundle size from 2.8 MB to 760 KB using code splitting, tree shaking, and lazy loading."
+        tags: [frontend]
+
+# ─────────────────────────────────────────
+projects:
+  # priority: 2 → this project leads the list for backend and devops targets
+  - name: "FlowCache"
+    description: "A consistent-hashing distributed cache in Go supporting LRU eviction, replication factor 3, and automatic node rebalancing. Benchmarked at 600K ops/sec on a 4-node cluster."
+    tech: [Go, gRPC, Protocol Buffers, Redis, Docker]
+    github: "github.com/jordanrivera-example/flowcache"
+    tags: [backend, devops]
+    priority: 2
+
+  - name: "JobMatchML"
+    description: "Fine-tuned a BERT-based classifier on 10K labeled job descriptions to extract skills and match candidates, achieving F1=0.89 on a held-out test set. Packaged as a FastAPI microservice."
+    tech: [Python, PyTorch, HuggingFace, FastAPI, PostgreSQL]
+    github: "github.com/jordanrivera-example/jobmatch-ml"
+    tags: [data-science, backend]
+
+  - name: "LiveBoard"
+    description: "Real-time analytics dashboard with D3.js visualizations, WebSocket-fed live metrics, and drag-and-drop widget layout. Used by 250+ users in open beta."
+    tech: [React, TypeScript, D3.js, WebSockets, FastAPI]
+    github: "github.com/jordanrivera-example/liveboard"
+    tags: [frontend, data-science]
+
+  - name: "InfraWatch"
+    description: "Kubernetes operator (Go) that watches custom CRDs and auto-scales deployments based on Prometheus metrics, with PagerDuty alerting integration."
+    tech: [Go, Kubernetes, Prometheus, Helm, PagerDuty API]
+    github: "github.com/jordanrivera-example/infrawatch"
+    tags: [devops, backend]
+
+  - name: "StreamLite"
+    description: "Lightweight streaming SQL engine on Kafka Streams supporting windowed aggregations and joins with sub-second latency."
+    tech: [Java, Kafka Streams, Avro, Maven]
+    github: "github.com/jordanrivera-example/streamlite"
+    tags: [data-science, backend]
+
+  - name: "CanvasCo"
+    description: "Browser-based collaborative drawing tool with real-time multi-user editing via WebRTC data channels and WebGL rendering."
+    tech: [TypeScript, WebRTC, WebGL, Vite, Node.js]
+    github: "github.com/jordanrivera-example/canvasco"
+    tags: [frontend]
+
+# ─────────────────────────────────────────
+skills:
+  languages:
+    - name: "Python"
+      tags: [backend, data-science, general]
+    - name: "Go"
+      tags: [backend, devops]
+    - name: "TypeScript / JavaScript"
+      tags: [frontend, backend]
+    - name: "Java"
+      tags: [backend, data-science]
+    - name: "SQL"
+      tags: [backend, data-science, general]
+    - name: "Bash"
+      tags: [devops, backend]
+    - name: "R"
+      tags: [data-science]
+
+  frameworks:
+    - name: "FastAPI / Flask / Django"
+      tags: [backend]
+    - name: "React / Next.js"
+      tags: [frontend]
+    - name: "PyTorch / TensorFlow"
+      tags: [data-science]
+    - name: "Apache Spark / Flink"
+      tags: [data-science, backend]
+    - name: "Kafka Streams"
+      tags: [data-science, backend]
+    - name: "gRPC / Protocol Buffers"
+      tags: [backend]
+    - name: "D3.js / Three.js"
+      tags: [frontend, data-science]
+
+  tools:
+    - name: "Docker / Kubernetes"
+      tags: [devops, backend]
+    - name: "Terraform / Helm"
+      tags: [devops]
+    - name: "GitHub Actions / Jenkins"
+      tags: [devops, general]
+    - name: "Apache Airflow / dbt"
+      tags: [data-science]
+    - name: "Prometheus / Grafana"
+      tags: [devops, backend]
+    - name: "Git"
+      tags: [general]
+
+  databases:
+    - name: "PostgreSQL / MySQL"
+      tags: [backend, data-science, general]
+    - name: "Redis"
+      tags: [backend]
+    - name: "MongoDB"
+      tags: [backend, frontend]
+    - name: "Snowflake / BigQuery"
+      tags: [data-science]
+    - name: "Elasticsearch"
+      tags: [backend, data-science]
+
+# ─────────────────────────────────────────
+achievements:
+  # priority: 1 → surfaces this achievement above equal-scored peers
+  - title: "AWS Certified Solutions Architect – Associate"
+    issuer: "Amazon Web Services"
+    date: "2023"
+    tags: [devops, backend]
+    priority: 1
+
+  - title: "Google Professional Data Engineer"
+    issuer: "Google Cloud"
+    date: "2022"
+    tags: [data-science, devops]
+
+  - title: "HackState 2021 — Best Infrastructure Hack"
+    issuer: "State University"
+    date: "2021"
+    tags: [backend, devops, general]
+
+  - title: "Dean's List (5 semesters)"
+    issuer: "Midwestern State University"
+    date: "2017–2021"
+    tags: [general]
+
+  - title: "Published: 'Scalable Approximate Nearest Neighbor Search' — ACM KDD 2021"
+    issuer: "ACM"
+    date: "2021"
+    tags: [data-science]
+
+  - title: "Speaker: PyCon US 2022 — 'Building Streaming Pipelines with Kafka and Python'"
+    issuer: "Python Software Foundation"
+    date: "2022"
+    tags: [backend, data-science]

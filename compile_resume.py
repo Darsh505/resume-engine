@@ -36,9 +36,43 @@ except ImportError:
     def _cyan(s):   return s
 
 # ─── Paths ────────────────────────────────────────────────────────────────────
-_HERE      = os.path.dirname(os.path.abspath(__file__))
-YAML_PATH  = os.path.join(_HERE, "resume_data.yaml")
-OUTPUT_DIR = os.path.join(_HERE, "output")
+_HERE         = os.path.dirname(os.path.abspath(__file__))
+_DATA_DIR     = os.path.join(_HERE, "data")
+_YAML_PRIMARY = os.path.join(_DATA_DIR, "resume.yaml")
+_YAML_EXAMPLE = os.path.join(_DATA_DIR, "resume.example.yaml")
+OUTPUT_DIR    = os.path.join(_HERE, "output")
+
+
+def _resolve_yaml_path() -> str:
+    """
+    Locate the YAML data file.
+
+    Lookup order:
+      1. data/resume.yaml          — your real, gitignored personal data.
+      2. data/resume.example.yaml  — fictional demo data shipped with the repo.
+
+    If neither exists the program exits with a clear setup instruction.
+    """
+    if os.path.exists(_YAML_PRIMARY):
+        return _YAML_PRIMARY
+    if os.path.exists(_YAML_EXAMPLE):
+        print(_yellow(
+            "[INFO] data/resume.yaml not found — using data/resume.example.yaml (demo data)."
+        ))
+        print(_yellow(
+            "       To use your own data: cp data/resume.example.yaml data/resume.yaml"
+            " and fill in your details."
+        ))
+        return _YAML_EXAMPLE
+    print(_red("[ERROR] No resume YAML data file found."))
+    print(_red("        Expected: data/resume.yaml  (personal)  OR"))
+    print(_red("                  data/resume.example.yaml  (demo)"))
+    print(_red("        Run:  cp data/resume.example.yaml data/resume.yaml"))
+    print(_red("        Then edit data/resume.yaml with your details."))
+    sys.exit(1)
+
+
+YAML_PATH = _resolve_yaml_path()
 
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -131,7 +165,8 @@ def cmd_compile(args: argparse.Namespace) -> None:
     try:
         resume_data = build_resume_data(YAML_PATH, target)
     except FileNotFoundError:
-        print(_red(f"[ERROR] resume_data.yaml not found at: {YAML_PATH}"))
+        print(_red(f"[ERROR] Resume YAML not found at: {YAML_PATH}"))
+        print(_red("        Run: cp data/resume.example.yaml data/resume.yaml"))
         sys.exit(1)
     except Exception as exc:
         print(_red(f"[ERROR] Failed to load/filter YAML: {exc}"))

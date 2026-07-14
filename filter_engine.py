@@ -2,6 +2,14 @@
 filter_engine.py — Tag-based filtering, ranking, and budget enforcement.
 
 All functions are pure (no side effects) and unit-testable.
+
+Priority field
+──────────────
+Any item (bullet, project, skill, achievement, coursework entry) may carry an
+optional ``priority: int`` field.  ``rank_by_relevance`` uses it as the
+*primary* sort key (descending), with the existing tag-relevance score as a
+*secondary* tiebreaker.  Items without ``priority`` default to 0, so the field
+is entirely optional — existing YAML files require no changes.
 """
 
 from __future__ import annotations
@@ -68,10 +76,28 @@ def filter_list(items: list[dict], target: str) -> list[dict]:
 
 def rank_by_relevance(items: list[dict], target: str) -> list[dict]:
     """
-    Sort *items* by relevance score descending (most relevant first).
-    Uses a stable sort so items with equal scores preserve original order.
+    Sort *items* by relevance, with an optional ``priority`` boost.
+
+    Sort keys (both descending):
+      1. ``priority`` — explicit integer field on the item; missing → 0.
+      2. tag-relevance score — count of *target* occurrences in ``tags``
+         (the original ranking behaviour, now used as a tiebreaker).
+
+    The sort is stable, so items with identical ``priority`` **and** identical
+    relevance score preserve their original YAML order.
+
+    Why updated in-place rather than adding a new function?
+    ────────────────────────────────────────────────────────
+    All five section-level filters (filter_education, filter_experience,
+    filter_projects, filter_skills, filter_achievements) already call
+    rank_by_relevance.  Keeping the same name means every section benefits
+    from priority ranking without touching any call-site — DRY and safe.
     """
-    return sorted(items, key=lambda item: _relevance_score(item, target), reverse=True)
+    return sorted(
+        items,
+        key=lambda item: (item.get("priority", 0), _relevance_score(item, target)),
+        reverse=True,
+    )
 
 
 def apply_budget(items: list[dict], max_n: int) -> list[dict]:
