@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block title %}Edit Resume · Resume Engine{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Edit Resume</h1>
+    <p class="page-subtitle">Changes are validated and saved to <code>data/resume.yaml</code></p>
+  </div>
+  <div class="header-actions">
+    <span id="save-status" class="save-status" aria-live="polite"></span>
+    <button id="save-btn" class="btn btn-primary" onclick="saveResume()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+        <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/>
+        <polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>
+      </svg>
+      Save Changes
+    </button>
+  </div>
+</div>
+
+<!-- Validation errors banner -->
+<div id="error-banner" class="error-banner" style="display:none">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+    <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/>
+    <line x1="12" y1="16" x2="12.01" y2="16"/>
+  </svg>
+  <span id="error-banner-text"></span>
+</div>
+
+<!-- Resume state injected for app.js -->
+<script id="resume-data" type="application/json">{{ resume_json | safe }}</script>
+
+<!-- ── Sections — JS renders content into these containers ─────────────── -->
+<div class="sections-container">
+
+  <!-- Personal -->
+  <section class="form-section" id="section-personal">
+    <div class="section-header">
+      <h2 class="section-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+          <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>
+        </svg>
+        Personal Info
+      </h2>
+    </div>
+    <div class="section-content" id="personal-fields"></div>
+  </section>
+
+  <!-- Education -->
+  <section class="form-section" id="section-education">
+    <div class="section-header">
+      <h2 class="section-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+          <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+          <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+        </svg>
+        Education
+        <span class="count-badge" id="edu-count"></span>
+      </h2>
+      <button class="btn btn-add" onclick="addEntry('education')">+ Add Entry</button>
+    </div>
+    <div class="section-content" id="education-list"></div>
+  </section>
+
+  <!-- Experience -->
+  <section class="form-section" id="section-experience">
+    <div class="section-header">
+      <h2 class="section-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+          <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+          <path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/>
+        </svg>
+        Experience
+        <span class="count-badge" id="exp-count"></span>
+      </h2>
+      <button class="btn btn-add" onclick="addEntry('experience')">+ Add Job</button>
+    </div>
+    <div class="section-content" id="experience-list"></div>
+  </section>
+
+  <!-- Projects -->
+  <section class="form-section" id="section-projects">
+    <div class="section-header">
+      <h2 class="section-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+          <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+          <polyline points="2 17 12 22 22 17"/>
+          <polyline points="2 12 12 17 22 12"/>
+        </svg>
+        Projects
+        <span class="count-badge" id="proj-count"></span>
+      </h2>
+      <button class="btn btn-add" onclick="addEntry('projects')">+ Add Project</button>
+    </div>
+    <div class="section-content" id="projects-list"></div>
+  </section>
+
+  <!-- Skills -->
+  <section class="form-section" id="section-skills">
+    <div class="section-header">
+      <h2 class="section-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.07 4.93l-1.41 1.41M5.34 18.66l-1.41 1.41M2 12H4m16 0h2M5.34 5.34L6.75 6.75m10.5 10.5l1.41 1.41M12 2v2m0 16v2"/>
+        </svg>
+        Skills
+        <span class="count-badge" id="skills-count"></span>
+      </h2>
+      <button class="btn btn-add" onclick="addSkillCategory()">+ Add Category</button>
+    </div>
+    <div class="section-content" id="skills-list"></div>
+  </section>
+
+  <!-- Achievements -->
+  <section class="form-section" id="section-achievements">
+    <div class="section-header">
+      <h2 class="section-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+          <circle cx="12" cy="8" r="6"/>
+          <path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/>
+        </svg>
+        Achievements &amp; Certifications
+        <span class="count-badge" id="ach-count"></span>
+      </h2>
+      <button class="btn btn-add" onclick="addEntry('achievements')">+ Add Achievement</button>
+    </div>
+    <div class="section-content" id="achievements-list"></div>
+  </section>
+
+</div>
+
+<script src="/static/app.js"></script>
+{% endblock %}
