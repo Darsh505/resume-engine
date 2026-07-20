@@ -1,52 +1,63 @@
 /* ============================================================
-   style.css — Resume Engine dark theme
-   Color palette matches the PDF design tokens (navy accent).
+   style.css — Resume Engine · GitHub dark-mode design language
+   Palette root values are the real GitHub dark theme tokens.
    ============================================================ */
 
 /* ── Variables ──────────────────────────────────────────────────────────── */
 :root {
-  /* Backgrounds */
-  --bg-base:       #0D1117;
-  --bg-elevated:   #161B22;
-  --bg-card:       #1C2128;
-  --bg-input:      #0D1117;
-  --bg-hover:      #1F2937;
+  /* ─ Surface layers (three distinct levels, each ~5-7 L* apart) ───────── */
+  --bg-base:    #0D1117;   /* page canvas */
+  --bg-raised:  #161B22;   /* sidebar, section panels */
+  --bg-overlay: #1C2128;   /* entry cards on top of section panels */
+  --bg-nested:  #21262D;   /* nested items inside entry cards */
+  --bg-hover:   #1F2937;   /* hover tint */
+  --bg-input:   #0D1117;   /* form fields sit on canvas level */
 
-  /* Borders */
-  --border:        #30363D;
-  --border-light:  #3D4451;
-  --border-focus:  #2563EB;
+  /* ─ Borders ──────────────────────────────────────────────────────────── */
+  --border:       #30363D;   /* default 1px divider */
+  --border-muted: #21262D;   /* very subtle, inside cards */
+  --border-light: #3D4451;   /* emphasized / hover */
+  --border-focus: #2563EB;   /* input focus ring */
 
-  /* Brand / accent — matches PDF navy */
-  --accent:        #2563EB;
-  --accent-navy:   #1A3C6E;
-  --accent-glow:   rgba(37, 99, 235, 0.20);
-  --accent-subtle: rgba(37, 99, 235, 0.08);
+  /* ─ Accent (blue — used as connective tissue, not one isolated CTA) ─── */
+  --accent:         #2563EB;
+  --accent-hover:   #1D4ED8;
+  --accent-muted:   #1A3C6E;
+  --accent-glow:    rgba(37, 99, 235, 0.18);
+  --accent-subtle:  rgba(37, 99, 235, 0.08);
+  --accent-border:  rgba(37, 99, 235, 0.25);
 
-  /* Text */
-  --text-primary:   #E6EDF3;
-  --text-secondary: #8B949E;
-  --text-muted:     #58636D;
-  --text-code:      #79C0FF;
+  /* ─ Text hierarchy ───────────────────────────────────────────────────── */
+  --text-primary:   #E6EDF3;   /* headings, input values */
+  --text-secondary: #8B949E;   /* body, descriptions */
+  --text-muted:     #6E7681;   /* labels, hints, placeholders */
+  --text-code:      #79C0FF;   /* monospace inline code */
 
-  /* Status */
-  --success:     #3FB950;
-  --success-bg:  rgba(63, 185, 80, 0.10);
-  --error:       #F85149;
-  --error-bg:    rgba(248, 81, 73, 0.10);
-  --warning:     #D29922;
-  --warning-bg:  rgba(210, 153, 34, 0.10);
+  /* ─ Status ───────────────────────────────────────────────────────────── */
+  --success:        #3FB950;
+  --success-bg:     rgba(63, 185, 80, 0.08);
+  --success-border: rgba(63, 185, 80, 0.2);
+  --error:          #F85149;
+  --error-bg:       rgba(248, 81, 73, 0.08);
+  --error-border:   rgba(248, 81, 73, 0.25);
+  --warning:        #D29922;
+  --warning-bg:     rgba(210, 153, 34, 0.08);
+  --warning-border: rgba(210, 153, 34, 0.2);
 
-  /* Layout */
-  --sidebar-w: 236px;
-  --radius:    8px;
+  /* ─ Layout ───────────────────────────────────────────────────────────── */
+  --sidebar-w: 240px;
+  --radius:    6px;     /* GitHub uses tighter radius than most design systems */
   --radius-sm: 4px;
-  --radius-lg: 12px;
+  --radius-lg: 8px;
+  --radius-full: 9999px;
+
+  /* ─ Shadows ──────────────────────────────────────────────────────────── */
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.15);
+  --shadow-overlay: 0 8px 24px rgba(0,0,0,0.4);
 }
 
 /* ── Reset ──────────────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
 html { scroll-behavior: smooth; }
 
 body {
@@ -60,46 +71,50 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* ─ Inline code ─────────────────────────────────────────────────────────── */
 code {
-  font-family: "SF Mono", "Fira Code", Consolas, monospace;
+  font-family: "SF Mono", "Fira Code", ui-monospace, Consolas, monospace;
   font-size: 12px;
   color: var(--text-code);
-  background: rgba(121, 192, 255, 0.06);
-  padding: 1px 5px;
+  background: rgba(121, 192, 255, 0.05);
+  padding: 0.1em 0.4em;
   border-radius: 3px;
-  border: 1px solid rgba(121, 192, 255, 0.1);
+  border: 1px solid rgba(121, 192, 255, 0.08);
 }
 
-/* ── Sidebar ─────────────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   SIDEBAR
+   ═══════════════════════════════════════════════════════════════════════════ */
 .sidebar {
   position: fixed;
   top: 0; left: 0;
   width: var(--sidebar-w);
   height: 100vh;
-  background: var(--bg-elevated);
+  background: var(--bg-raised);
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   z-index: 100;
+  overflow-y: auto;
 }
 
+/* ── Logo ────────────────────────────────────────────────────────────────── */
 .sidebar-logo {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 20px 18px;
+  padding: 16px 16px 14px;
   border-bottom: 1px solid var(--border);
 }
 
 .logo-icon {
-  width: 22px;
-  height: 22px;
+  width: 20px; height: 20px;
   color: var(--accent);
   flex-shrink: 0;
 }
 
 .logo-text {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--text-primary);
   letter-spacing: -0.01em;
@@ -107,253 +122,330 @@ code {
 
 /* ── Nav ─────────────────────────────────────────────────────────────────── */
 .sidebar-nav {
-  padding: 12px 10px;
+  padding: 10px 8px;
   flex: 1;
+}
+
+/* Optionally: small muted group label above nav items */
+.nav-group-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 6px 10px 4px;
 }
 
 .nav-link {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 9px 12px;
-  border-radius: var(--radius-sm);
+  gap: 8px;
+  padding: 7px 10px;
+  /* GitHub active nav uses a left border, not a box border */
+  border-left: 2px solid transparent;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
   color: var(--text-secondary);
   text-decoration: none;
-  font-size: 13.5px;
+  font-size: 13px;
   font-weight: 500;
-  transition: background 0.15s ease, color 0.15s ease;
-  margin-bottom: 2px;
+  transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+  margin-bottom: 1px;
 }
 
 .nav-link svg {
-  width: 16px;
-  height: 16px;
+  width: 15px; height: 15px;
   flex-shrink: 0;
+  opacity: 0.7;
+  transition: opacity 0.12s;
 }
 
 .nav-link:hover {
   background: var(--bg-hover);
   color: var(--text-primary);
 }
+.nav-link:hover svg { opacity: 1; }
 
+/* Active: 2px left accent border + very subtle tint — the GitHub pattern */
 .nav-link.active {
   background: var(--accent-subtle);
   color: var(--accent);
-  border: 1px solid rgba(37, 99, 235, 0.2);
+  border-left-color: var(--accent);
 }
+.nav-link.active svg { color: var(--accent); opacity: 1; }
 
-.nav-link.active svg { color: var(--accent); }
-
-/* ── Sidebar footer ──────────────────────────────────────────────────────── */
+/* ── Sidebar footer callout ──────────────────────────────────────────────── */
 .sidebar-footer {
-  padding: 14px 16px;
+  padding: 12px 12px 16px;
   border-top: 1px solid var(--border);
 }
 
+/*
+  GitHub-style info callout box: subtly bordered, icon + text,
+  replaces the plain paragraph that was there before.
+*/
+.data-callout {
+  background: var(--bg-nested);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.data-callout-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.data-callout-dot {
+  width: 8px; height: 8px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+.data-callout-dot-example { background: var(--warning); }
+.data-callout-dot-real    { background: var(--success); }
+
+.data-callout-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.data-callout-body {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  line-height: 1.55;
+}
+
+/* Legacy support — keep old badge classes in case of partial render */
 .data-badge {
   display: inline-flex;
   align-items: center;
   gap: 5px;
   font-size: 11px;
   font-weight: 600;
-  padding: 3px 8px;
-  border-radius: 20px;
-  margin-bottom: 6px;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  margin-bottom: 5px;
   letter-spacing: 0.02em;
   text-transform: uppercase;
 }
+.data-badge-example { background: var(--warning-bg); color: var(--warning); }
+.data-badge-real    { background: var(--success-bg); color: var(--success); }
+.data-hint { font-size: 11.5px; color: var(--text-muted); line-height: 1.5; }
 
-.data-badge-example {
-  background: var(--warning-bg);
-  color: var(--warning);
-  border: 1px solid rgba(210, 153, 34, 0.25);
-}
-
-.data-badge-real {
-  background: var(--success-bg);
-  color: var(--success);
-  border: 1px solid rgba(63, 185, 80, 0.25);
-}
-
-.data-hint {
-  font-size: 11.5px;
-  color: var(--text-muted);
-  line-height: 1.5;
-}
-
-/* ── Main content ─────────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   MAIN CONTENT AREA
+   ═══════════════════════════════════════════════════════════════════════════ */
 .main {
   margin-left: var(--sidebar-w);
   flex: 1;
-  padding: 32px 40px 64px;
-  max-width: calc(900px + var(--sidebar-w));
+  padding: 0 40px 64px;
+  max-width: calc(880px + var(--sidebar-w));
   min-height: 100vh;
 }
 
-/* ── Page header ─────────────────────────────────────────────────────────── */
+/* ── Page header band ────────────────────────────────────────────────────── */
+/*
+  GitHub's page header: title+subtitle on the left, primary CTA on the right,
+  the whole band sits in a clearly separated horizontal strip with a bottom border.
+  We push it full-bleed within the main content column.
+*/
 .page-header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  margin-bottom: 28px;
-  padding-bottom: 22px;
+  padding: 20px 0 18px;
+  margin-bottom: 24px;
   border-bottom: 1px solid var(--border);
 }
 
 .page-title {
-  font-size: 22px;
-  font-weight: 700;
+  font-size: 20px;
+  font-weight: 600;
   color: var(--text-primary);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.015em;
+  line-height: 1.25;
 }
 
 .page-subtitle {
-  font-size: 13px;
-  color: var(--text-secondary);
-  margin-top: 3px;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 2px;
 }
 
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  flex-shrink: 0;
 }
 
 .save-status {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
   transition: opacity 0.3s;
 }
 .save-status.status-success { color: var(--success); }
 .save-status.status-error   { color: var(--error); }
 
-/* ── Error banner ────────────────────────────────────────────────────────── */
+/* ── Error / validation banner ───────────────────────────────────────────── */
 .error-banner {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
   background: var(--error-bg);
-  border: 1px solid rgba(248, 81, 73, 0.3);
+  border: 1px solid var(--error-border);
   border-radius: var(--radius);
   padding: 10px 14px;
   margin-bottom: 20px;
   color: var(--error);
   font-size: 13px;
+  line-height: 1.5;
 }
+.error-banner svg { flex-shrink: 0; margin-top: 1px; }
 
-/* ── Form sections ───────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   FORM SECTIONS  — surface level 2 (raised panels)
+   ═══════════════════════════════════════════════════════════════════════════ */
 .sections-container {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
 }
 
 .form-section {
-  background: var(--bg-elevated);
+  background: var(--bg-raised);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   overflow: hidden;
 }
 
+/* ── Section header ──────────────────────────────────────────────────────── */
 .section-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 20px;
+  padding: 12px 16px;
   border-bottom: 1px solid var(--border);
-  background: var(--bg-card);
+  /* Sits on the same surface level as the card itself, not darker */
+  background: transparent;
 }
 
 .section-title {
   display: flex;
   align-items: center;
-  gap: 9px;
-  font-size: 14.5px;
+  gap: 10px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--text-primary);
 }
 
-.section-title svg { color: var(--accent); }
+/*
+  Icon swatch: small rounded square with a very faint accent tint,
+  the section icon sits inside it — similar to GitHub's repo/org icon treatment.
+*/
+.section-icon-swatch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px; height: 28px;
+  background: var(--accent-subtle);
+  border: 1px solid var(--accent-border);
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+.section-icon-swatch svg { color: var(--accent); }
 
+/* Count pill — GitHub style: no border, muted bg, monospace number */
 .count-badge {
   font-size: 11px;
   font-weight: 600;
-  color: var(--text-secondary);
-  background: var(--bg-hover);
-  border: 1px solid var(--border);
+  color: var(--text-muted);
+  background: var(--bg-nested);
   padding: 1px 7px;
-  border-radius: 10px;
+  border-radius: var(--radius-full);
   min-width: 20px;
   text-align: center;
+  font-variant-numeric: tabular-nums;
 }
 
-.section-content { padding: 16px 20px; }
+.section-content { padding: 14px 16px; }
 
-/* ── Entry cards ─────────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   ENTRY CARDS  — surface level 3 (cards inside sections)
+   ═══════════════════════════════════════════════════════════════════════════ */
 .entry-card {
-  background: var(--bg-card);
+  background: var(--bg-overlay);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   overflow: hidden;
-  transition: border-color 0.2s;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
-
-.entry-card:hover { border-color: var(--border-light); }
+.entry-card:hover {
+  border-color: var(--border-light);
+  box-shadow: var(--shadow-card);
+}
 .entry-card:last-child { margin-bottom: 0; }
 
 .card-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 14px;
-  background: rgba(255,255,255,0.02);
-  border-bottom: 1px solid var(--border);
+  padding: 9px 12px;
+  background: rgba(255,255,255,0.015);
+  border-bottom: 1px solid var(--border-muted);
 }
 
 .card-title {
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 600;
   color: var(--text-secondary);
 }
 
-.card-body { padding: 14px; }
+.card-body { padding: 12px; }
 
-/* ── Fields ──────────────────────────────────────────────────────────────── */
-.fields-grid {
-  display: grid;
-  gap: 12px;
-}
+/* ═══════════════════════════════════════════════════════════════════════════
+   FORM FIELDS
+   ═══════════════════════════════════════════════════════════════════════════ */
+.fields-grid { display: grid; gap: 12px; }
+.fields-grid-1 { grid-template-columns: 1fr; }
 .fields-grid-2 { grid-template-columns: 1fr 1fr; }
 .fields-grid-3 { grid-template-columns: 1fr 1fr 1fr; }
-.fields-grid-1 { grid-template-columns: 1fr; }
 
 .field-group {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 4px;
 }
-
 .field-group.span-2 { grid-column: span 2; }
 
+/* GitHub field label: uppercase, tracked, small, muted */
 label {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--text-secondary);
-  letter-spacing: 0.01em;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
-.req { color: var(--error); margin-left: 2px; }
+.req { color: var(--error); margin-left: 2px; text-transform: none; }
 
 .field-hint {
   font-size: 11.5px;
   color: var(--text-muted);
   line-height: 1.5;
   margin-top: 2px;
+  text-transform: none;
+  font-weight: 400;
+  letter-spacing: 0;
 }
-
 .field-hint-warn { color: var(--warning); }
 
+/* ── Text inputs ─────────────────────────────────────────────────────────── */
 .field-input {
   background: var(--bg-input);
   border: 1px solid var(--border);
@@ -361,87 +453,102 @@ label {
   color: var(--text-primary);
   font-family: inherit;
   font-size: 13.5px;
-  padding: 7px 10px;
+  padding: 6px 10px;
   width: 100%;
-  transition: border-color 0.15s, box-shadow 0.15s;
   outline: none;
+  transition: border-color 0.12s, box-shadow 0.12s;
 }
-
 .field-input::placeholder { color: var(--text-muted); }
 
+/* Hover: barely perceptible, just brightens the border */
+.field-input:hover:not(:focus) { border-color: var(--border-light); }
+
+/* Focus: obvious accent ring — the GitHub pattern */
 .field-input:focus {
   border-color: var(--border-focus);
   box-shadow: 0 0 0 3px var(--accent-glow);
 }
 
+/* Validation error state */
 .field-input.field-invalid {
   border-color: var(--error);
-  box-shadow: 0 0 0 3px rgba(248, 81, 73, 0.15);
+  box-shadow: 0 0 0 3px rgba(248, 81, 73, 0.12);
 }
-
 .field-error {
   font-size: 11.5px;
   color: var(--error);
   margin-top: 2px;
+  font-weight: 500;
 }
 
 textarea.field-input {
   resize: vertical;
-  min-height: 72px;
+  min-height: 68px;
   line-height: 1.5;
 }
 
+/* Select — custom chevron, disabled muted */
 .select-input {
   cursor: pointer;
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238B949E' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236E7681' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 10px center;
   padding-right: 30px;
 }
+.select-input:disabled { opacity: 0.45; cursor: not-allowed; }
+.select-input option { background: var(--bg-overlay); }
 
-.select-input:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* ── Sub-sections (bullets, coursework, tech) ────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   NESTED / SUB-SECTION ITEMS  — surface level 4 (inside entry cards)
+   Visual hierarchy: recessed bg + thin left accent line, tighter padding
+   ═══════════════════════════════════════════════════════════════════════════ */
 .sub-section {
-  margin-top: 14px;
-  padding-top: 14px;
-  border-top: 1px solid var(--border);
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-muted);
 }
 
 .sub-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
+/* Small uppercase muted group label — mirrors GitHub's sidebar section labels */
 .sub-title {
-  font-size: 12px;
+  font-size: 10.5px;
   font-weight: 600;
-  color: var(--text-secondary);
+  color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
 }
 
+/*
+  Nested items (bullets, coursework, skill rows):
+  - recessed bg (nested level, darker than the card)
+  - thin 2px left border in accent color (subordinate but connected)
+  - tighter padding than outer card
+*/
 .bullet-card {
   display: flex;
   gap: 8px;
   align-items: flex-start;
-  background: rgba(0,0,0,0.2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 10px;
-  margin-bottom: 8px;
+  background: var(--bg-nested);
+  border: 1px solid var(--border-muted);
+  border-left: 2px solid var(--accent-muted);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: 8px 10px;
+  margin-bottom: 6px;
+  transition: border-left-color 0.15s;
 }
+.bullet-card:hover { border-left-color: var(--accent); }
 .bullet-card:last-child { margin-bottom: 0; }
 
 .bullet-fields { flex: 1; display: flex; flex-direction: column; gap: 8px; }
 
-/* Skills category input */
+/* Category name inline edit for skills — underline style */
 .category-name-input {
   background: transparent;
   border: none;
@@ -454,105 +561,133 @@ textarea.field-input {
   padding: 2px 4px;
   width: 160px;
   outline: none;
-  transition: border-color 0.15s;
+  transition: border-color 0.12s;
 }
 .category-name-input:focus { border-color: var(--border-focus); }
 
+/* Skill row: name / tags / remove — same recessed treatment */
 .skill-item {
   display: grid;
   grid-template-columns: 1fr 1fr auto;
   gap: 8px;
   align-items: end;
-  margin-bottom: 6px;
+  margin-bottom: 5px;
 }
 .skill-item:last-child { margin-bottom: 0; }
 
-/* Tags hint */
 .tags-input { font-size: 12.5px; }
 
-/* ── Buttons ─────────────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   BUTTONS — three distinct variants
+   ═══════════════════════════════════════════════════════════════════════════ */
 .btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   font-family: inherit;
   font-size: 13px;
   font-weight: 500;
-  padding: 7px 14px;
+  padding: 6px 14px;
   border-radius: var(--radius-sm);
   border: 1px solid transparent;
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s, opacity 0.15s;
+  transition: background 0.12s, border-color 0.12s, box-shadow 0.12s, opacity 0.12s;
   text-decoration: none;
   white-space: nowrap;
+  line-height: 1.4;
 }
-.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
 
+/* ── Primary: solid accent fill — Save Changes ───────────────────────────── */
 .btn-primary {
   background: var(--accent);
   color: #fff;
   border-color: var(--accent);
+  font-weight: 600;
 }
 .btn-primary:hover:not(:disabled) {
-  background: #1d4ed8;
-  border-color: #1d4ed8;
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
   box-shadow: 0 0 0 3px var(--accent-glow);
 }
 
+/* ── Secondary / outline: Generate & Download, Push to Remote ───────────── */
 .btn-secondary {
-  background: var(--bg-card);
+  background: transparent;
   color: var(--text-primary);
   border-color: var(--border-light);
 }
 .btn-secondary:hover:not(:disabled) {
   background: var(--bg-hover);
-  border-color: var(--text-muted);
+  border-color: var(--border-focus);
+  color: var(--accent);
 }
 
-.btn-lg { padding: 10px 20px; font-size: 14px; }
+/* Large variant */
+.btn-lg { padding: 8px 18px; font-size: 14px; font-weight: 600; }
 
+/* ── Outline add entry — "+ Add Entry" in section headers ───────────────── */
+/*
+  Not the accent-filled style — this is a secondary/outline button
+  that uses accent color for text only, hover gets a faint tint.
+*/
 .btn-add {
   font-size: 12px;
-  padding: 5px 10px;
-  background: transparent;
-  color: var(--accent);
-  border: 1px solid rgba(37, 99, 235, 0.3);
-  border-radius: var(--radius-sm);
-}
-.btn-add:hover {
-  background: var(--accent-subtle);
-  border-color: var(--accent);
-}
-
-.btn-add-sub {
-  font-size: 11px;
-  padding: 4px 8px;
+  padding: 4px 10px;
   background: transparent;
   color: var(--text-secondary);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   cursor: pointer;
   font-family: inherit;
-  transition: color 0.15s, border-color 0.15s, background 0.15s;
+  font-weight: 500;
+  transition: color 0.12s, border-color 0.12s, background 0.12s;
 }
-.btn-add-sub:hover { color: var(--text-primary); border-color: var(--border-light); background: var(--bg-hover); }
+.btn-add:hover {
+  color: var(--accent);
+  border-color: var(--accent-border);
+  background: var(--accent-subtle);
+}
 
+/* ── Sub-level add — "+ Add Bullet", "+ Add Course" ─────────────────────── */
+.btn-add-sub {
+  font-size: 11px;
+  padding: 3px 8px;
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border-muted);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 500;
+  transition: color 0.12s, border-color 0.12s, background 0.12s;
+}
+.btn-add-sub:hover {
+  color: var(--accent);
+  border-color: var(--accent-border);
+  background: var(--accent-subtle);
+}
+
+/* ── Ghost / icon-only: close/remove (×) buttons ────────────────────────── */
+/*
+  No border at all in the default state. Hover shows only a background tint.
+  This is GitHub's icon button pattern.
+*/
 .btn-remove {
   background: transparent;
   color: var(--text-muted);
-  border: 1px solid transparent;
+  border: none;
   border-radius: var(--radius-sm);
   cursor: pointer;
-  font-size: 13px;
-  padding: 3px 7px;
+  font-size: 14px;
+  padding: 3px 6px;
   font-family: inherit;
-  transition: color 0.15s, background 0.15s, border-color 0.15s;
+  transition: color 0.12s, background 0.12s;
   line-height: 1;
 }
 .btn-remove:hover {
   color: var(--error);
   background: var(--error-bg);
-  border-color: rgba(248, 81, 73, 0.2);
 }
 
 .btn-remove-small {
@@ -560,118 +695,150 @@ textarea.field-input {
   color: var(--text-muted);
   border: none;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 13px;
   padding: 2px 5px;
-  border-radius: 3px;
+  border-radius: var(--radius-sm);
   font-family: inherit;
   flex-shrink: 0;
-  transition: color 0.15s;
+  transition: color 0.12s, background 0.12s;
   align-self: flex-start;
-  margin-top: 2px;
+  margin-top: 1px;
+  line-height: 1.4;
 }
-.btn-remove-small:hover { color: var(--error); }
+.btn-remove-small:hover {
+  color: var(--error);
+  background: var(--error-bg);
+}
 
-/* ── Checkboxes ──────────────────────────────────────────────────────────── */
-.checkbox-group { margin-top: 4px; }
+/* ═══════════════════════════════════════════════════════════════════════════
+   CHECKBOXES
+   ═══════════════════════════════════════════════════════════════════════════ */
+.checkbox-group { margin-top: 2px; }
 
 .checkbox-label {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
+  gap: 9px;
   cursor: pointer;
 }
 
 .checkbox-label input[type="checkbox"] {
-  margin-top: 2px;
+  margin-top: 3px;
   accent-color: var(--accent);
-  width: 15px;
-  height: 15px;
+  width: 14px; height: 14px;
   flex-shrink: 0;
   cursor: pointer;
 }
 
 .checkbox-text {
-  font-size: 13.5px;
+  font-size: 13px;
   color: var(--text-primary);
-  font-weight: normal;
+  font-weight: 400;
   display: flex;
   flex-direction: column;
   gap: 2px;
+  text-transform: none;
+  letter-spacing: 0;
 }
 
 .checkbox-hint {
   font-size: 11.5px;
-  color: var(--text-secondary);
+  color: var(--text-muted);
   font-weight: 400;
 }
 
-/* ── Generate page layout ─────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   GENERATE PAGE
+   ═══════════════════════════════════════════════════════════════════════════ */
 .generate-layout {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  max-width: 680px;
+  gap: 16px;
+  max-width: 660px;
 }
 
+/* Gen cards use the same raised surface as form sections */
 .gen-card {
-  background: var(--bg-elevated);
+  background: var(--bg-raised);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 24px;
+  padding: 0;
+  overflow: hidden;
 }
 
 .gen-card-title {
   display: flex;
   align-items: center;
-  gap: 9px;
-  font-size: 15px;
+  gap: 10px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--text-primary);
-  margin-bottom: 20px;
-  padding-bottom: 14px;
+  padding: 12px 16px;
   border-bottom: 1px solid var(--border);
+  margin-bottom: 0;
 }
-
 .gen-card-title svg { color: var(--accent); }
 
-.gen-card .field-group { margin-bottom: 18px; }
-.gen-card .field-group:last-child { margin-bottom: 0; }
+/* Icon swatch inside gen card title */
+.gen-card-icon-swatch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px; height: 26px;
+  background: var(--accent-subtle);
+  border: 1px solid var(--accent-border);
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+.gen-card-icon-swatch svg { color: var(--accent); }
 
-.form-actions { margin-top: 22px; }
+.gen-card-body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
 
+.gen-card .field-group { margin-bottom: 0; }
+
+.form-actions { margin-top: 4px; }
+
+/* Result callout areas */
 .gen-result {
-  margin-top: 14px;
-  padding: 10px 14px;
+  margin-top: 12px;
+  padding: 9px 13px;
   border-radius: var(--radius-sm);
   font-size: 13px;
   line-height: 1.5;
+  border: 1px solid transparent;
 }
 .gen-result.result-success {
   background: var(--success-bg);
   color: var(--success);
-  border: 1px solid rgba(63, 185, 80, 0.25);
+  border-color: var(--success-border);
 }
 .gen-result.result-error {
   background: var(--error-bg);
   color: var(--error);
-  border: 1px solid rgba(248, 81, 73, 0.25);
+  border-color: var(--error-border);
 }
 .gen-result.result-info {
   background: var(--accent-subtle);
   color: var(--accent);
-  border: 1px solid rgba(37, 99, 235, 0.2);
+  border-color: var(--accent-border);
 }
 
+/* Git push card — slightly distinguished */
 .git-card { border-color: var(--border-light); }
 
 .git-card-desc {
   font-size: 13px;
   color: var(--text-secondary);
-  margin-bottom: 18px;
   line-height: 1.6;
+  margin-bottom: 0;
 }
 
-/* ── Badge ───────────────────────────────────────────────────────────────── */
+/* ── Topic/language badge — "Coming soon" ────────────────────────────────── */
 .badge-coming-soon {
   font-size: 10px;
   font-weight: 600;
@@ -679,52 +846,58 @@ textarea.field-input {
   letter-spacing: 0.04em;
   color: var(--warning);
   background: var(--warning-bg);
-  border: 1px solid rgba(210, 153, 34, 0.25);
+  border: 1px solid var(--warning-border);
   padding: 1px 6px;
-  border-radius: 10px;
+  border-radius: var(--radius-full);
   vertical-align: middle;
   margin-left: 6px;
 }
 
-/* ── Toast notification ──────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   TOAST NOTIFICATIONS
+   ═══════════════════════════════════════════════════════════════════════════ */
 .toast {
   position: fixed;
-  bottom: 24px;
-  right: 24px;
-  min-width: 260px;
-  max-width: 400px;
-  padding: 12px 16px;
+  bottom: 20px; right: 20px;
+  min-width: 240px; max-width: 380px;
+  padding: 11px 15px;
   border-radius: var(--radius);
   font-size: 13px;
   font-weight: 500;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  box-shadow: var(--shadow-overlay);
   z-index: 9999;
   opacity: 0;
-  transform: translateY(8px);
-  transition: opacity 0.25s, transform 0.25s;
+  transform: translateY(6px);
+  transition: opacity 0.2s, transform 0.2s;
   pointer-events: none;
+  border: 1px solid transparent;
 }
 .toast.toast-show {
   opacity: 1;
   transform: translateY(0);
   pointer-events: auto;
 }
-.toast.toast-success { background: var(--success-bg); color: var(--success); border: 1px solid rgba(63,185,80,0.3); }
-.toast.toast-error   { background: var(--error-bg);   color: var(--error);   border: 1px solid rgba(248,81,73,0.3); }
-.toast.toast-info    { background: var(--accent-subtle); color: var(--accent); border: 1px solid rgba(37,99,235,0.2); }
+.toast.toast-success { background: var(--bg-overlay); color: var(--success); border-color: var(--success-border); }
+.toast.toast-error   { background: var(--bg-overlay); color: var(--error);   border-color: var(--error-border); }
+.toast.toast-info    { background: var(--bg-overlay); color: var(--accent);  border-color: var(--accent-border); }
 
-/* ── Scrollbar ───────────────────────────────────────────────────────────── */
-::-webkit-scrollbar { width: 6px; height: 6px; }
+/* ═══════════════════════════════════════════════════════════════════════════
+   SCROLLBAR
+   ═══════════════════════════════════════════════════════════════════════════ */
+::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: var(--radius-full); }
+::-webkit-scrollbar-thumb:hover { background: var(--border-light); }
 
-/* ── Responsive ──────────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════════════════════════════════ */
 @media (max-width: 780px) {
-  .fields-grid-2, .fields-grid-3 { grid-template-columns: 1fr; }
-  .field-group.span-2 { grid-column: span 1; }
-  .skill-item { grid-template-columns: 1fr auto; }
+  .fields-grid-2,
+  .fields-grid-3       { grid-template-columns: 1fr; }
+  .field-group.span-2  { grid-column: span 1; }
+  .skill-item          { grid-template-columns: 1fr auto; }
   .skill-item .field-group:last-of-type { display: none; }
-  .main { padding: 20px 16px 48px; }
-  .page-header { flex-direction: column; gap: 12px; }
+  .main                { padding: 0 16px 48px; }
+  .page-header         { flex-direction: column; gap: 10px; align-items: flex-start; }
 }

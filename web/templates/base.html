@@ -13,6 +13,8 @@
 
   <!-- ── Sidebar ─────────────────────────────────────────────────────────── -->
   <aside class="sidebar">
+
+    <!-- Logo -->
     <div class="sidebar-logo">
       <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
@@ -24,7 +26,9 @@
       <span class="logo-text">Resume Engine</span>
     </div>
 
+    <!-- Nav — group label + two nav links -->
     <nav class="sidebar-nav">
+      <p class="nav-group-label">Pages</p>
       <a href="/" class="nav-link {% if request.url.path == '/' %}active{% endif %}">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
@@ -40,27 +44,30 @@
       </a>
     </nav>
 
+    <!-- Footer — GitHub-style bordered callout, not a plain paragraph -->
     <div class="sidebar-footer">
       {% if using_example %}
-        <div class="data-badge data-badge-example">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
-            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/>
-            <line x1="12" y1="16" x2="12.01" y2="16"/>
-          </svg>
-          Demo data
+        <div class="data-callout">
+          <div class="data-callout-header">
+            <span class="data-callout-dot data-callout-dot-example"></span>
+            <span class="data-callout-label">Demo data</span>
+          </div>
+          <p class="data-callout-body">
+            Using <code>resume.example.yaml</code>.<br>
+            Save edits to create your own <code>resume.yaml</code>.
+          </p>
         </div>
-        <p class="data-hint">Using <code>resume.example.yaml</code>.<br>
-          Save edits to create your <code>resume.yaml</code>.</p>
       {% else %}
-        <div class="data-badge data-badge-real">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
-            <polyline points="20 6 9 17 4 12"/>
-          </svg>
-          Your data
+        <div class="data-callout">
+          <div class="data-callout-header">
+            <span class="data-callout-dot data-callout-dot-real"></span>
+            <span class="data-callout-label">Your data</span>
+          </div>
+          <p class="data-callout-body">Editing <code>resume.yaml</code></p>
         </div>
-        <p class="data-hint">Editing <code>resume.yaml</code></p>
       {% endif %}
     </div>
+
   </aside>
 
   <!-- ── Main ────────────────────────────────────────────────────────────── -->
