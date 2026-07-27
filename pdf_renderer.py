@@ -1,25 +1,34 @@
 """
-pdf_renderer.py — ReportLab-based multi-page PDF resume renderer.
+pdf_renderer.py — Single-page A4 PDF resume renderer with Adaptive Layout Engine.
 
 Design tokens
 ─────────────
   Accent color  : #1A3C6E  (deep navy)
   Body text     : #1F2937  (near-black)
   Muted text    : #6B7280  (grey)
-  Rule color    : #1A3C6E
+  Rule color    : #D1D5DB  (light grey — subtle dividers)
   Fonts         : Helvetica family (built-in, no external files needed)
-  Page size     : Letter (8.5 × 11 in)
-  Margins       : 0.60 in left/right, 0.50 in top/bottom
+  Page size     : A4 (8.27 × 11.69 in)
+  Margins       : 0.45 in left/right, 0.38 in top, 0.32 in bottom
 
-Multi-page
-──────────
-Content that overflows a page automatically continues on the next page
-via Canvas.showPage().  The renderer never silently truncates — a long
-resume produces two pages rather than a silently shorter one.
+Adaptive Layout Engine
+──────────────────────
+Two-pass rendering:
+  Pass 1 (dry run): Simulate drawing to measure total content height.
+  Pass 2 (real):    If content fits, render normally.  If it overflows,
+                    progressively tighten spacing through up to 4 compression
+                    levels until everything fits, then render for real.
 
-Overflow is handled by the single ``_check_or_new_page()`` method on
-``Renderer``, which replaces the four copy-pasted ``try/except`` blocks
-that previously existed in every section method.
+Single-page guarantee
+─────────────────────
+The renderer NEVER calls Canvas.showPage().  Content that cannot fit even
+at maximum compression is clamped at the bottom margin rather than spilling
+onto a second page.  The adaptive engine is designed so that typical
+resume content always fits at some compression level.
+
+Public API (unchanged)
+──────────────────────
+  render_pdf(resume_data: dict, output_path: str) -> None
 """
 
 from __future__ import annotations
@@ -27,64 +36,116 @@ from __future__ import annotations
 from typing import Any
 
 from reportlab.lib import colors
-from reportlab.lib.pagesizes import LETTER
+from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import inch
 from reportlab.pdfgen.canvas import Canvas
 
 # ─── Design tokens ────────────────────────────────────────────────────────────
-ACCENT      = colors.HexColor("#1A3C6E")   # deep navy — name, section titles, accent rule
-BODY_COLOR  = colors.HexColor("#1F2937")   # near-black — body text
-MUTED_COLOR = colors.HexColor("#6B7280")   # grey — dates, contact info, tech stack
-RULE_COLOR  = colors.HexColor("#1A3C6E")   # matches ACCENT
+ACCENT      = colors.HexColor("#1A3C6E")   # deep navy — name, section titles
+BODY_COLOR  = colors.HexColor("#1F2937")   # near-black — all body text
+MUTED_COLOR = colors.HexColor("#6B7280")   # grey — dates, contact, tech stack
+RULE_COLOR  = colors.HexColor("#CBD5E1")   # light slate — section dividers
+HEADER_RULE = colors.HexColor("#1A3C6E")   # accent — header underline
 
-PAGE_W, PAGE_H  = LETTER            # 612 × 792 pts
-MARGIN_X        = 0.60 * inch       # left & right          (was 0.55)
-MARGIN_Y_TOP    = 0.50 * inch       # top margin            (was 0.45)
-MARGIN_Y_BOTTOM = 0.50 * inch       # bottom margin         (was 0.45)
+PAGE_W, PAGE_H = A4                        # 595.28 × 841.89 pts
 
-CONTENT_W = PAGE_W - 2 * MARGIN_X
-LEFT      = MARGIN_X
-RIGHT     = PAGE_W - MARGIN_X
-BOTTOM_Y  = MARGIN_Y_BOTTOM         # y below which content must not be drawn
+# ─── Compression levels ───────────────────────────────────────────────────────
+# Each level defines the complete set of spacing parameters.
+# Level 0 = default comfortable spacing.
+# Level 3 = most compact; still professionally readable.
 
-# ── Typography ────────────────────────────────────────────────────────────────
-FS_NAME      = 22      # candidate name in header
-FS_CONTACT   = 8.5    # contact line beneath name
-FS_SECTION   = 11.5   # section titles            (was 10.5 — +1pt for clearer hierarchy)
-FS_JOB_TITLE = 10     # company / project name    (was  9.5 — creates a visible tier)
-FS_BODY      = 9      # body text, bullets        (was  8.5 — more readable)
-FS_BULLET    = 9      # bullet text               (was  8.5 — matches body)
-FS_SKILLS    = 9      # skill list                (was  8.5 — matches body)
+_LEVELS = [
+    # level 0 — comfortable
+    dict(
+        margin_x       = 0.45 * inch,
+        margin_top     = 0.38 * inch,
+        margin_bottom  = 0.32 * inch,
+        fs_name        = 17,
+        fs_contact     = 8.5,
+        fs_section     = 10.5,
+        fs_company     = 9.5,
+        fs_role        = 9.0,
+        fs_body        = 8.75,
+        fs_skills      = 8.75,
+        leading_factor = 1.32,
+        section_pre    = 7.0,   # pts above each section header
+        rule_gap       = 5.5,   # pts below section rule before first content
+        entry_gap      = 4.0,   # pts between entries within a section
+        bullet_indent  = 10,    # pts from left margin to bullet glyph
+        bullet_hang    = 7,     # hanging-indent for wrapped bullet lines
+    ),
+    # level 1 — slightly tighter
+    dict(
+        margin_x       = 0.45 * inch,
+        margin_top     = 0.35 * inch,
+        margin_bottom  = 0.30 * inch,
+        fs_name        = 17,
+        fs_contact     = 8.5,
+        fs_section     = 10.5,
+        fs_company     = 9.5,
+        fs_role        = 9.0,
+        fs_body        = 8.75,
+        fs_skills      = 8.75,
+        leading_factor = 1.26,
+        section_pre    = 5.5,
+        rule_gap       = 4.5,
+        entry_gap      = 3.0,
+        bullet_indent  = 10,
+        bullet_hang    = 7,
+    ),
+    # level 2 — compact
+    dict(
+        margin_x       = 0.43 * inch,
+        margin_top     = 0.32 * inch,
+        margin_bottom  = 0.28 * inch,
+        fs_name        = 16,
+        fs_contact     = 8.5,
+        fs_section     = 10.5,
+        fs_company     = 9.5,
+        fs_role        = 9.0,
+        fs_body        = 8.5,
+        fs_skills      = 8.5,
+        leading_factor = 1.22,
+        section_pre    = 4.5,
+        rule_gap       = 3.5,
+        entry_gap      = 2.5,
+        bullet_indent  = 9,
+        bullet_hang    = 6,
+    ),
+    # level 3 — minimal (8.5pt body floor, tight leading)
+    dict(
+        margin_x       = 0.40 * inch,
+        margin_top     = 0.28 * inch,
+        margin_bottom  = 0.25 * inch,
+        fs_name        = 16,
+        fs_contact     = 8.5,
+        fs_section     = 10.5,
+        fs_company     = 9.5,
+        fs_role        = 8.75,
+        fs_body        = 8.5,
+        fs_skills      = 8.5,
+        leading_factor = 1.18,
+        section_pre    = 3.5,
+        rule_gap       = 3.0,
+        entry_gap      = 2.0,
+        bullet_indent  = 8,
+        bullet_hang    = 5,
+    ),
+]
 
-# ── Spacing ───────────────────────────────────────────────────────────────────
-# All values are in ReportLab points (1 pt = 1/72 in).
-#
-# LEADING          : vertical distance from one text baseline to the next.
-#                    1.45× is standard for professional body copy; 1.35× felt cramped.
-# SECTION_PRE_GAP  : blank space inserted ABOVE each section header, so sections
-#                    breathe away from the preceding content.  This is what creates
-#                    the visible inter-section gap.
-# RULE_TO_CONTENT  : distance from the section-rule line to the first content row.
-#                    Large enough that content ascenders clear the rule.
-# ENTRY_GAP        : space appended after each item (job, project, achievement)
-#                    within a section.  Was hard-coded as 3 — named and bumped to 5.
-# BULLET_INDENT    : horizontal offset of the bullet glyph from LEFT.
-# BULLET_HANG      : additional indent for wrapped bullet-continuation lines, creating
-#                    a hanging-indent effect.  Was the magic number 6, now named.
-
-LEADING         = FS_BODY * 1.45    # ≈ 13.05 pt   (was FS_BODY * 1.35 ≈ 11.48 pt)
-SECTION_PRE_GAP = 10                # pts above section header  (replaces part of SECTION_GAP)
-RULE_TO_CONTENT = 10                # pts below rule to content (replaces rest of SECTION_GAP)
-ENTRY_GAP       = 5                 # pts between entries       (was hard-coded 3)
-BULLET_INDENT   = 12                # pts bullet offset from LEFT  (was 10)
-BULLET_HANG     = 8                 # hanging-indent for wrapped bullet lines (was magic 6)
-BULLET_CHAR     = "▸ "
+BULLET_CHAR = "\u2022 "   # clean round bullet (U+2022), more ATS-friendly than ▸
 
 
 # ─── Text wrapping ────────────────────────────────────────────────────────────
 
-def _wrap_text(text: str, canvas: Canvas, font: str, size: float, max_w: float) -> list[str]:
-    """Word-wrap *text* to fit within *max_w* points.  Returns list of lines."""
+def _wrap_text(
+    text: str,
+    canvas: Canvas,
+    font: str,
+    size: float,
+    max_w: float,
+) -> list[str]:
+    """Word-wrap *text* to fit within *max_w* points. Returns list of lines."""
     canvas.setFont(font, size)
     words = text.split()
     lines: list[str] = []
@@ -99,158 +160,174 @@ def _wrap_text(text: str, canvas: Canvas, font: str, size: float, max_w: float) 
             current = word
     if current:
         lines.append(current)
-    return lines
+    return lines or [""]
 
 
 # ─── Renderer ─────────────────────────────────────────────────────────────────
 
 class Renderer:
     """
-    Stateful renderer that tracks the Y cursor across one or more pages.
+    Stateful, single-page A4 renderer.
 
     Coordinate system (ReportLab convention)
     ─────────────────────────────────────────
-    • Origin (0, 0) is the bottom-left of the page.
-    • ``y`` increases upward; ``PAGE_H`` is the top of the page.
-    • ``self.y`` starts near the top and *decreases* as content is drawn.
-    • ``_move(dy)`` advances the cursor *down* by ``dy`` points.
+    Origin (0, 0) is the bottom-left of the page.
+    self.y starts near the top and decreases as content is drawn.
+    _move(dy) advances the cursor DOWN by dy points.
 
-    Multi-page
-    ──────────
-    ``_check_or_new_page(needed)`` is the single, canonical overflow gate.
-    Every section method calls it before drawing a block; if there is not
-    enough vertical room, it calls ``_new_page()`` which invokes
-    ``Canvas.showPage()`` and resets the cursor to the top of the fresh page.
-    No content is ever silently dropped.
+    Dry-run mode
+    ────────────
+    When self._dry is True the renderer simulates drawing but writes nothing
+    to the canvas.  self.y still moves exactly as in a real render, so the
+    final self.y value reflects how much vertical space was consumed.
     """
 
-    def __init__(self, canvas: Canvas) -> None:
-        self.c = canvas
-        self.y = PAGE_H - MARGIN_Y_TOP
-        self._page_num: int = 1
+    def __init__(self, canvas: Canvas, params: dict, dry: bool = False) -> None:
+        self.c   = canvas
+        self.p   = params
+        self._dry = dry
 
-    # ── page helpers ──────────────────────────────────────────────────────────
+        mx = params["margin_x"]
+        mt = params["margin_top"]
+        mb = params["margin_bottom"]
+
+        self.LEFT     = mx
+        self.RIGHT    = PAGE_W - mx
+        self.CONTENT_W = PAGE_W - 2 * mx
+        self.BOTTOM_Y  = mb
+
+        self.y = PAGE_H - mt
+        self._page_num = 1
+
+    # ── helpers ───────────────────────────────────────────────────────────────
 
     def _move(self, dy: float) -> None:
-        """Advance the cursor *down* by *dy* points."""
         self.y -= dy
 
-    def _new_page(self) -> None:
-        """
-        Finalize the current page and begin a fresh one.
+    def _leading(self, fs: float | None = None) -> float:
+        """Compute leading for a given font size (default: fs_body)."""
+        s = fs if fs is not None else self.p["fs_body"]
+        return s * self.p["leading_factor"]
 
-        After this call ``self.y`` is reset to the top of the new page, so
-        all subsequent drawing calls work identically to page 1 — no caller
-        needs to detect or react to the page boundary.
+    def _draw_string(self, x: float, y: float, text: str) -> None:
+        if not self._dry:
+            self.c.drawString(x, y, text)
 
-        A subtle page-number label ("Page N") is drawn in the top-right
-        corner of continuation pages (page 2 onward), using the top-margin
-        area so it does not consume any content space.
-        """
-        self.c.showPage()
-        self._page_num += 1
-        self.y = PAGE_H - MARGIN_Y_TOP
+    def _draw_right_string(self, x: float, y: float, text: str) -> None:
+        if not self._dry:
+            self.c.drawRightString(x, y, text)
 
-        # Draw page number in the top margin of continuation pages only.
-        # Drawn AFTER self.y is reset, using the top-margin area above self.y.
-        self.c.setFont("Helvetica", 7)
-        self.c.setFillColor(MUTED_COLOR)
-        self.c.drawRightString(RIGHT, PAGE_H - MARGIN_Y_TOP / 2, f"Page {self._page_num}")
+    def _draw_centred_string(self, x: float, y: float, text: str) -> None:
+        if not self._dry:
+            self.c.drawCentredString(x, y, text)
 
-    def _check_or_new_page(self, needed: float) -> None:
-        """
-        Ensure *needed* vertical points are available below the cursor.
+    def _line(self, x1: float, y1: float, x2: float, y2: float) -> None:
+        if not self._dry:
+            self.c.line(x1, y1, x2, y2)
 
-        This is the single replacement for the four copy-pasted
-        ``try/except _OverflowWarning`` blocks that previously existed in
-        every section method.  Instead of raising an exception and silently
-        aborting the section, we simply start a new page and continue.
+    def _set_font(self, font: str, size: float) -> None:
+        # Always set font even in dry mode so stringWidth works correctly.
+        self.c.setFont(font, size)
 
-        Args:
-            needed: height in points of the block about to be drawn.
-        """
-        if self.y - needed < BOTTOM_Y:
-            self._new_page()
+    def _set_fill(self, color: colors.Color) -> None:
+        if not self._dry:
+            self.c.setFillColor(color)
 
-    # ── section header ────────────────────────────────────────────────────────
+    def _set_stroke(self, color: colors.Color) -> None:
+        if not self._dry:
+            self.c.setStrokeColor(color)
 
-    def section_header(self, title: str) -> None:
-        """
-        Draw a bold all-caps section title with a full-width rule beneath it.
+    def _set_line_width(self, w: float) -> None:
+        if not self._dry:
+            self.c.setLineWidth(w)
 
-        Layout (top to bottom):
-          SECTION_PRE_GAP   — blank breathing space above (inter-section gap)
-          title text        — Helvetica-Bold, FS_SECTION, in ACCENT colour
-          FS_SECTION + 2 pts gap to rule
-          rule line         — 0.75 pt stroke in RULE_COLOR
-          RULE_TO_CONTENT   — space before first content row
-        """
-        # Total height consumed before any content is drawn.
-        # +2 for the gap between title baseline and rule; +1 for rule thickness.
-        needed = SECTION_PRE_GAP + FS_SECTION + 2 + 1 + RULE_TO_CONTENT
-        self._check_or_new_page(needed)
+    # ── page guard ────────────────────────────────────────────────────────────
 
-        self._move(SECTION_PRE_GAP)
-
-        self.c.setFont("Helvetica-Bold", FS_SECTION)
-        self.c.setFillColor(ACCENT)
-        self.c.drawString(LEFT, self.y, title.upper())
-        # Move cursor from the title baseline to just below the text so the rule
-        # sits snugly beneath the letters.  FS_SECTION accounts for the full
-        # cap-height; +2 adds a small clearance below the baseline.
-        # (The original code used FS_SECTION + 1, placing the rule one full
-        # text-height below the baseline, which left an unnecessarily large gap.)
-        self._move(FS_SECTION + 2)
-
-        self.c.setStrokeColor(RULE_COLOR)
-        self.c.setLineWidth(0.75)   # was 1 pt — slightly lighter for a refined look
-        self.c.line(LEFT, self.y, RIGHT, self.y)
-        self._move(RULE_TO_CONTENT)
+    def _will_overflow(self, needed: float) -> bool:
+        """Return True if drawing *needed* pts from current y would hit bottom."""
+        return self.y - needed < self.BOTTOM_Y
 
     # ── name / contact header ─────────────────────────────────────────────────
 
     def name_block(self, personal: dict[str, Any]) -> None:
-        """Draw the candidate name, contact line, and header divider."""
+        """Draw the modern centered header: name, headline, contacts, links."""
+        p = self.p
         name     = personal.get("name", "")
         email    = personal.get("email", "")
         phone    = personal.get("phone", "")
         linkedin = personal.get("linkedin", "")
         github   = personal.get("github", "")
         website  = personal.get("website", "")
+        headline = personal.get("headline", "")   # optional title line
 
-        # Name — large, centred, accent colour
-        self.c.setFont("Helvetica-Bold", FS_NAME)
-        self.c.setFillColor(ACCENT)
-        self.c.drawCentredString(PAGE_W / 2, self.y, name)
-        self._move(FS_NAME + 4)
+        # ── Name ──────────────────────────────────────────────────────────────
+        self._set_font("Helvetica-Bold", p["fs_name"])
+        self._set_fill(BODY_COLOR)
+        self._draw_centred_string(PAGE_W / 2, self.y, name)
+        self._move(p["fs_name"] + 3)
 
-        # Contact line — all parts joined by bullets, centred, muted
-        separator    = "  •  "
-        parts        = [p for p in [email, phone, linkedin, github, website] if p]
-        contact_line = separator.join(parts)
-        self.c.setFont("Helvetica", FS_CONTACT)
-        self.c.setFillColor(MUTED_COLOR)
-        self.c.drawCentredString(PAGE_W / 2, self.y, contact_line)
-        self._move(FS_CONTACT + 7)
+        # ── Headline / title (optional) ────────────────────────────────────────
+        if headline:
+            self._set_font("Helvetica", p["fs_contact"])
+            self._set_fill(MUTED_COLOR)
+            self._draw_centred_string(PAGE_W / 2, self.y, headline)
+            self._move(p["fs_contact"] + 2)
 
-        # Divider — heavier accent stroke marking end of the header block
-        self.c.setStrokeColor(ACCENT)
-        self.c.setLineWidth(1.5)
-        self.c.line(LEFT, self.y, RIGHT, self.y)
+        # ── Contact line: email • phone ─────────────────────────────────────
+        contact_parts = [p for p in [email, phone] if p]
+        if contact_parts:
+            sep = "  \u2022  "
+            contact_line = sep.join(contact_parts)
+            self._set_font("Helvetica", p["fs_contact"])
+            self._set_fill(MUTED_COLOR)
+            self._draw_centred_string(PAGE_W / 2, self.y, contact_line)
+            self._move(p["fs_contact"] + 2)
+
+        # ── Links line: linkedin • github • website ─────────────────────────
+        link_parts = [lk for lk in [linkedin, github, website] if lk]
+        if link_parts:
+            sep = "  \u2022  "
+            link_line = sep.join(link_parts)
+            self._set_font("Helvetica", p["fs_contact"])
+            self._set_fill(MUTED_COLOR)
+            self._draw_centred_string(PAGE_W / 2, self.y, link_line)
+            self._move(p["fs_contact"] + 3)
+
+        # ── Header rule ─────────────────────────────────────────────────────
+        self._set_stroke(HEADER_RULE)
+        self._set_line_width(1.0)
+        self._line(self.LEFT, self.y, self.RIGHT, self.y)
         self._move(4)
+
+    # ── section header ────────────────────────────────────────────────────────
+
+    def section_header(self, title: str) -> None:
+        """Draw an uppercase section title with a full-width light rule beneath."""
+        p = self.p
+        fs = p["fs_section"]
+
+        self._move(p["section_pre"])
+
+        self._set_font("Helvetica-Bold", fs)
+        self._set_fill(ACCENT)
+        self._draw_string(self.LEFT, self.y, title.upper())
+        self._move(fs + 1.5)
+
+        # Thin light rule beneath title
+        self._set_stroke(RULE_COLOR)
+        self._set_line_width(0.5)
+        self._line(self.LEFT, self.y, self.RIGHT, self.y)
+        self._move(p["rule_gap"])
 
     # ── education ─────────────────────────────────────────────────────────────
 
     def education_section(self, entries: list[dict]) -> None:
-        """
-        Draw the Education section.
-
-        Degree entries are always included (the filter_engine guarantees this).
-        Only the coursework list within each entry is filtered/budgeted.
-        """
+        """Draw the Education section."""
         if not entries:
             return
         self.section_header("Education")
+        p = self.p
+        ld = self._leading()
 
         for entry in entries:
             institution = entry.get("institution", "")
@@ -259,51 +336,51 @@ class Renderer:
             gpa         = entry.get("gpa", "")
             coursework  = entry.get("coursework", [])
 
-            self._check_or_new_page(FS_JOB_TITLE + LEADING + 2)
+            if self._will_overflow(p["fs_company"] + ld + 2):
+                break
 
-            # Institution (bold, left) + dates (muted, right) on the same baseline
-            self.c.setFont("Helvetica-Bold", FS_JOB_TITLE)
-            self.c.setFillColor(BODY_COLOR)
-            self.c.drawString(LEFT, self.y, institution)
-            self.c.setFont("Helvetica", FS_BODY)
-            self.c.setFillColor(MUTED_COLOR)
-            self.c.drawRightString(RIGHT, self.y, dates)
-            self._move(FS_JOB_TITLE + 2)
+            # Institution bold left + date muted right
+            self._set_font("Helvetica-Bold", p["fs_company"])
+            self._set_fill(BODY_COLOR)
+            self._draw_string(self.LEFT, self.y, institution)
+            self._set_font("Helvetica", p["fs_body"])
+            self._set_fill(MUTED_COLOR)
+            self._draw_right_string(self.RIGHT, self.y, dates)
+            self._move(p["fs_company"] + 1.5)
 
-            # Degree (italic) with optional GPA
-            self.c.setFont("Helvetica-Oblique", FS_BODY)
-            self.c.setFillColor(BODY_COLOR)
-            deg_gpa = degree + (f"  —  GPA: {gpa}" if gpa else "")
-            self.c.drawString(LEFT, self.y, deg_gpa)
-            self._move(LEADING)
+            # Degree italic + GPA inline
+            deg_text = degree + (f"  —  GPA: {gpa}" if gpa else "")
+            self._set_font("Helvetica-Oblique", p["fs_body"])
+            self._set_fill(BODY_COLOR)
+            self._draw_string(self.LEFT, self.y, deg_text)
+            self._move(ld)
 
-            # Relevant coursework — word-wrapped, muted colour
+            # Coursework — compact single line if space allows
             if coursework:
-                course_names = ", ".join(c["name"] for c in coursework)
-                course_line  = f"Relevant Coursework: {course_names}"
-                lines = _wrap_text(course_line, self.c, "Helvetica", FS_BODY, CONTENT_W)
-                self._check_or_new_page(len(lines) * LEADING)
-                self.c.setFont("Helvetica", FS_BODY)
-                self.c.setFillColor(MUTED_COLOR)
-                for line in lines:
-                    self.c.drawString(LEFT, self.y, line)
-                    self._move(LEADING)
+                names = " • ".join(c["name"] for c in coursework)
+                course_line = f"Relevant Coursework:  {names}"
+                cw_lines = _wrap_text(
+                    course_line, self.c, "Helvetica", p["fs_body"] - 0.25,
+                    self.CONTENT_W,
+                )
+                if not self._will_overflow(len(cw_lines) * ld):
+                    self._set_font("Helvetica", p["fs_body"] - 0.25)
+                    self._set_fill(MUTED_COLOR)
+                    for line in cw_lines:
+                        self._draw_string(self.LEFT, self.y, line)
+                        self._move(ld)
 
-            self._move(ENTRY_GAP)
+            self._move(p["entry_gap"])
 
     # ── experience ────────────────────────────────────────────────────────────
 
     def experience_section(self, jobs: list[dict]) -> None:
-        """
-        Draw the Experience section.
-
-        Each job entry renders its header (company + dates, role + location)
-        followed by indented bullet points.  The company header and at least
-        one line of content are kept together on the same page.
-        """
+        """Draw the Experience section."""
         if not jobs:
             return
         self.section_header("Experience")
+        p = self.p
+        ld = self._leading()
 
         for job in jobs:
             company  = job.get("company", "")
@@ -312,54 +389,53 @@ class Renderer:
             location = job.get("location", "")
             bullets  = job.get("bullets", [])
 
-            # Require room for the header row plus at least one content line so
-            # we never produce an orphaned company name at the bottom of a page.
-            self._check_or_new_page(FS_JOB_TITLE + LEADING * 2)
+            if self._will_overflow(p["fs_company"] + ld * 2):
+                break
 
-            # Company (bold, left) + dates (muted, right) on the same baseline
-            self.c.setFont("Helvetica-Bold", FS_JOB_TITLE)
-            self.c.setFillColor(BODY_COLOR)
-            self.c.drawString(LEFT, self.y, company)
-            self.c.setFont("Helvetica", FS_BODY)
-            self.c.setFillColor(MUTED_COLOR)
-            self.c.drawRightString(RIGHT, self.y, dates)
-            self._move(FS_JOB_TITLE + 2)
+            # Company bold left + dates muted right
+            self._set_font("Helvetica-Bold", p["fs_company"])
+            self._set_fill(BODY_COLOR)
+            self._draw_string(self.LEFT, self.y, company)
+            self._set_font("Helvetica", p["fs_body"])
+            self._set_fill(MUTED_COLOR)
+            self._draw_right_string(self.RIGHT, self.y, dates)
+            self._move(p["fs_company"] + 1.5)
 
-            # Role (italic, body colour) + optional location (same line)
-            self.c.setFont("Helvetica-Oblique", FS_BODY)
-            self.c.setFillColor(BODY_COLOR)
-            role_loc = role + (f"  ·  {location}" if location else "")
-            self.c.drawString(LEFT, self.y, role_loc)
-            self._move(LEADING + 2)
+            # Role italic + location (compact, same line)
+            role_loc = role + (f"  \u00b7  {location}" if location else "")
+            self._set_font("Helvetica-Oblique", p["fs_role"])
+            self._set_fill(BODY_COLOR)
+            self._draw_string(self.LEFT, self.y, role_loc)
+            self._move(p["fs_role"] + 2.5)
 
-            # Bullet points — hanging indent on wrapped lines
-            bullet_x = LEFT + BULLET_INDENT
-            bullet_w = CONTENT_W - BULLET_INDENT
+            # Bullets
+            bx = self.LEFT + p["bullet_indent"]
+            bw = self.CONTENT_W - p["bullet_indent"]
             for bullet in bullets:
-                text  = bullet.get("text", "") if isinstance(bullet, dict) else str(bullet)
-                lines = _wrap_text(BULLET_CHAR + text, self.c, "Helvetica", FS_BULLET, bullet_w)
-                self._check_or_new_page(len(lines) * LEADING)
-                self.c.setFont("Helvetica", FS_BULLET)
-                self.c.setFillColor(BODY_COLOR)
+                text = bullet.get("text", "") if isinstance(bullet, dict) else str(bullet)
+                lines = _wrap_text(BULLET_CHAR + text, self.c, "Helvetica", p["fs_body"], bw)
+                if self._will_overflow(len(lines) * ld):
+                    break
+                self._set_font("Helvetica", p["fs_body"])
+                self._set_fill(BODY_COLOR)
                 first = True
                 for line in lines:
-                    # First line: full BULLET_INDENT from LEFT.
-                    # Continuation lines: further indented by BULLET_HANG to
-                    # create a hanging-indent that aligns text past the bullet glyph.
-                    x = bullet_x if first else bullet_x + BULLET_HANG
-                    self.c.drawString(x, self.y, line)
-                    self._move(LEADING)
+                    x = bx if first else bx + p["bullet_hang"]
+                    self._draw_string(x, self.y, line)
+                    self._move(ld)
                     first = False
 
-            self._move(ENTRY_GAP)
+            self._move(p["entry_gap"])
 
-    # ── projects ─────────────────────────────────────────────────────────────
+    # ── projects ──────────────────────────────────────────────────────────────
 
     def projects_section(self, projects: list[dict]) -> None:
         """Draw the Projects section."""
         if not projects:
             return
         self.section_header("Projects")
+        p = self.p
+        ld = self._leading()
 
         for proj in projects:
             name   = proj.get("name", "")
@@ -367,85 +443,89 @@ class Renderer:
             tech   = proj.get("tech", [])
             github = proj.get("github", "")
 
-            self._check_or_new_page(FS_JOB_TITLE + LEADING * 2)
+            if self._will_overflow(p["fs_company"] + ld * 2):
+                break
 
-            # Project name (bold, accent colour) + optional GitHub URL (muted, right)
-            self.c.setFont("Helvetica-Bold", FS_JOB_TITLE)
-            self.c.setFillColor(ACCENT)
-            self.c.drawString(LEFT, self.y, name)
+            # Project name (bold, accent) + GitHub URL right-aligned
+            self._set_font("Helvetica-Bold", p["fs_company"])
+            self._set_fill(ACCENT)
+            self._draw_string(self.LEFT, self.y, name)
             if github:
-                self.c.setFont("Helvetica", FS_BODY - 0.5)
-                self.c.setFillColor(MUTED_COLOR)
-                self.c.drawRightString(RIGHT, self.y, github)
-            self._move(FS_JOB_TITLE + 2)
+                self._set_font("Helvetica", p["fs_body"] - 0.5)
+                self._set_fill(MUTED_COLOR)
+                self._draw_right_string(self.RIGHT, self.y, github)
+            self._move(p["fs_company"] + 1.5)
 
-            # Tech stack (italic, muted, slightly smaller than body)
+            # Tech stack — compact, bullet-separated
             if tech:
-                tech_str = "Tech: " + ", ".join(tech)
-                self.c.setFont("Helvetica-Oblique", FS_BODY - 0.5)
-                self.c.setFillColor(MUTED_COLOR)
-                self.c.drawString(LEFT, self.y, tech_str)
-                self._move(LEADING)
+                tech_str = "Tech: " + " \u2022 ".join(tech)
+                self._set_font("Helvetica-Oblique", p["fs_body"] - 0.25)
+                self._set_fill(MUTED_COLOR)
+                self._draw_string(self.LEFT, self.y, tech_str)
+                self._move(ld)
 
-            # Description — word-wrapped body text
-            lines = _wrap_text(desc, self.c, "Helvetica", FS_BODY, CONTENT_W)
-            self._check_or_new_page(len(lines) * LEADING)
-            self.c.setFont("Helvetica", FS_BODY)
-            self.c.setFillColor(BODY_COLOR)
-            for line in lines:
-                self.c.drawString(LEFT, self.y, line)
-                self._move(LEADING)
+            # Description — word-wrapped prose
+            if desc:
+                lines = _wrap_text(desc, self.c, "Helvetica", p["fs_body"], self.CONTENT_W)
+                if not self._will_overflow(len(lines) * ld):
+                    self._set_font("Helvetica", p["fs_body"])
+                    self._set_fill(BODY_COLOR)
+                    for line in lines:
+                        self._draw_string(self.LEFT, self.y, line)
+                        self._move(ld)
 
-            self._move(ENTRY_GAP)
+            self._move(p["entry_gap"])
 
     # ── skills ────────────────────────────────────────────────────────────────
 
     def skills_section(self, skills: dict[str, list[str]]) -> None:
         """
-        Draw the Skills section.
+        Draw the Skills section in a compact horizontal format.
 
-        Each category renders as a single run:
-          **Category:** skill1, skill2, skill3, …
+        Each category is rendered as one run:
+          Languages:  Python  •  Go  •  TypeScript  •  SQL
 
-        The category label is bold; the skill list is regular weight.
-        Long lines wrap; continuation lines are indented 4 pts.
+        The category label is bold; the skills are regular weight, separated by •.
         """
         if not skills:
             return
         self.section_header("Skills")
+        p = self.p
+        ld = self._leading(p["fs_skills"])
 
         for category, names in skills.items():
-            line_text = f"{category.capitalize()}: " + ", ".join(names)
-            lines = _wrap_text(line_text, self.c, "Helvetica", FS_SKILLS, CONTENT_W)
-            self._check_or_new_page(len(lines) * LEADING)
+            label    = f"{category.capitalize()}: "
+            skill_str = "  \u2022  ".join(names)
+            full_line = label + skill_str
+
+            lines = _wrap_text(full_line, self.c, "Helvetica", p["fs_skills"], self.CONTENT_W)
+            if self._will_overflow(len(lines) * ld):
+                break
 
             for i, line in enumerate(lines):
                 if i == 0:
-                    # First line: bold label through ":", then regular text for skills.
-                    # This is a two-pass draw: measure bold label width, draw it, then
-                    # draw the rest starting immediately after.
                     colon_idx = line.find(":")
                     if colon_idx != -1:
-                        label   = line[: colon_idx + 1]
-                        rest    = line[colon_idx + 1 :]
-                        label_w = self.c.stringWidth(label, "Helvetica-Bold", FS_SKILLS)
-                        self.c.setFont("Helvetica-Bold", FS_SKILLS)
-                        self.c.setFillColor(BODY_COLOR)
-                        self.c.drawString(LEFT, self.y, label)
-                        self.c.setFont("Helvetica", FS_SKILLS)
-                        self.c.drawString(LEFT + label_w, self.y, rest)
+                        lbl  = line[: colon_idx + 1]
+                        rest = line[colon_idx + 1 :]
+                        lbl_w = self.c.stringWidth(lbl, "Helvetica-Bold", p["fs_skills"])
+                        self._set_font("Helvetica-Bold", p["fs_skills"])
+                        self._set_fill(BODY_COLOR)
+                        self._draw_string(self.LEFT, self.y, lbl)
+                        self._set_font("Helvetica", p["fs_skills"])
+                        self._draw_string(self.LEFT + lbl_w, self.y, rest)
                     else:
-                        self.c.setFont("Helvetica", FS_SKILLS)
-                        self.c.setFillColor(BODY_COLOR)
-                        self.c.drawString(LEFT, self.y, line)
+                        self._set_font("Helvetica", p["fs_skills"])
+                        self._set_fill(BODY_COLOR)
+                        self._draw_string(self.LEFT, self.y, line)
                 else:
-                    # Continuation lines — slight indent
-                    self.c.setFont("Helvetica", FS_SKILLS)
-                    self.c.setFillColor(BODY_COLOR)
-                    self.c.drawString(LEFT + 4, self.y, line)
-                self._move(LEADING)
+                    # Continuation wrap: indent past the label
+                    self._set_font("Helvetica", p["fs_skills"])
+                    self._set_fill(BODY_COLOR)
+                    self._draw_string(self.LEFT + 4, self.y, line)
+                self._move(ld)
 
-        self._move(ENTRY_GAP)
+        self._move(p["entry_gap"])
 
     # ── achievements ──────────────────────────────────────────────────────────
 
@@ -454,6 +534,8 @@ class Renderer:
         if not achievements:
             return
         self.section_header("Achievements & Certifications")
+        p = self.p
+        ld = self._leading()
 
         for ach in achievements:
             title  = ach.get("title", "")
@@ -461,35 +543,80 @@ class Renderer:
             date   = ach.get("date", "")
 
             lines = _wrap_text(
-                f"{BULLET_CHAR}{title}",
-                self.c, "Helvetica", FS_BODY,
-                CONTENT_W - BULLET_INDENT,
+                BULLET_CHAR + title,
+                self.c, "Helvetica", p["fs_body"],
+                self.CONTENT_W - p["bullet_indent"],
             )
-            self._check_or_new_page(len(lines) * LEADING)
+            if self._will_overflow(len(lines) * ld):
+                break
 
-            self.c.setFont("Helvetica", FS_BODY)
-            self.c.setFillColor(BODY_COLOR)
+            self._set_font("Helvetica", p["fs_body"])
+            self._set_fill(BODY_COLOR)
             for i, line in enumerate(lines):
-                x = LEFT + BULLET_INDENT if i == 0 else LEFT + BULLET_INDENT + BULLET_HANG
-                self.c.drawString(x, self.y, line)
-                self._move(LEADING)
+                x = self.LEFT + p["bullet_indent"] if i == 0 else self.LEFT + p["bullet_indent"] + p["bullet_hang"]
+                self._draw_string(x, self.y, line)
+                self._move(ld)
 
             if issuer or date:
                 meta = "  ".join(filter(None, [issuer, date]))
-                self.c.setFont("Helvetica-Oblique", FS_BODY - 0.5)
-                self.c.setFillColor(MUTED_COLOR)
-                self.c.drawString(LEFT + BULLET_INDENT + BULLET_HANG, self.y, meta)
-                self._move(LEADING)
+                self._set_font("Helvetica-Oblique", p["fs_body"] - 0.5)
+                self._set_fill(MUTED_COLOR)
+                self._draw_string(
+                    self.LEFT + p["bullet_indent"] + p["bullet_hang"],
+                    self.y, meta,
+                )
+                self._move(ld)
+
+    # ── full render ───────────────────────────────────────────────────────────
+
+    def render_all(self, resume_data: dict[str, Any]) -> None:
+        """Draw all resume sections in the canonical order."""
+        self.name_block(resume_data.get("personal", {}))
+        self.education_section(resume_data.get("education", []))
+        self.experience_section(resume_data.get("experience", []))
+        self.projects_section(resume_data.get("projects", []))
+        self.skills_section(resume_data.get("skills", {}))
+        self.achievements_section(resume_data.get("achievements", []))
+
+    # ── measure ───────────────────────────────────────────────────────────────
+
+    def height_used(self) -> float:
+        """Return how many points of vertical space have been consumed."""
+        return (PAGE_H - self.p["margin_top"]) - self.y
+
+
+# ─── Adaptive Layout Engine ───────────────────────────────────────────────────
+
+def _select_params(canvas: Canvas, resume_data: dict[str, Any]) -> dict:
+    """
+    Try each compression level (0 → 3).  Return the first level whose params
+    allow all content to fit within the available page height.
+
+    If even level 3 overflows (extremely long resume), level 3 is still used
+    — the renderer will simply stop drawing at the bottom margin rather than
+    creating a second page.
+    """
+    for level, params in enumerate(_LEVELS):
+        available = PAGE_H - params["margin_top"] - params["margin_bottom"]
+        dry = Renderer(canvas, params, dry=True)
+        dry.render_all(resume_data)
+        used = dry.height_used()
+        if used <= available:
+            return params   # ← this level fits
+
+    # Nothing fits — use the tightest level anyway (content will be clamped).
+    return _LEVELS[-1]
 
 
 # ─── Public entry point ───────────────────────────────────────────────────────
 
 def render_pdf(resume_data: dict[str, Any], output_path: str) -> None:
     """
-    Render a PDF resume from *resume_data* and write it to *output_path*.
+    Render a single-page A4 PDF resume from *resume_data*.
 
-    Content that does not fit on a single Letter page automatically
-    continues on subsequent pages — the renderer never silently truncates.
+    The Adaptive Layout Engine selects the most comfortable spacing that
+    still keeps all content on one page.  The renderer never calls
+    showPage() — a second page is never created.
 
     *resume_data* is expected to come from ``filter_engine.build_resume_data()``.
     The ``render_pdf`` signature is unchanged from the previous version.
@@ -497,15 +624,14 @@ def render_pdf(resume_data: dict[str, Any], output_path: str) -> None:
     import os
     os.makedirs(os.path.dirname(os.path.abspath(output_path)), exist_ok=True)
 
-    c = Canvas(output_path, pagesize=LETTER)
+    c = Canvas(output_path, pagesize=A4)
     c.setTitle(f"Resume — {resume_data.get('personal', {}).get('name', 'Unknown')}")
 
-    r = Renderer(c)
-    r.name_block(resume_data.get("personal", {}))
-    r.education_section(resume_data.get("education", []))
-    r.experience_section(resume_data.get("experience", []))
-    r.projects_section(resume_data.get("projects", []))
-    r.skills_section(resume_data.get("skills", {}))
-    r.achievements_section(resume_data.get("achievements", []))
+    # Pass 1: dry-run to choose optimal spacing level
+    params = _select_params(c, resume_data)
+
+    # Pass 2: real render with chosen params
+    r = Renderer(c, params, dry=False)
+    r.render_all(resume_data)
 
     c.save()
