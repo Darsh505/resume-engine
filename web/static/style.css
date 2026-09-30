@@ -1,67 +1,75 @@
 /* ============================================================
-   style.css — Resume Engine · GitHub dark-mode design language
-   Palette root values are the real GitHub dark theme tokens.
+   style.css — Resume Studio · Document-editor design system
    ============================================================ */
 
-/* ── Variables ──────────────────────────────────────────────────────────── */
+/* ── Variables ──────────────────────────────────────────────── */
 :root {
-  /* ─ Surface layers (three distinct levels, each ~5-7 L* apart) ───────── */
-  --bg-base:    #0D1117;   /* page canvas */
-  --bg-raised:  #161B22;   /* sidebar, section panels */
-  --bg-overlay: #1C2128;   /* entry cards on top of section panels */
-  --bg-nested:  #21262D;   /* nested items inside entry cards */
-  --bg-hover:   #1F2937;   /* hover tint */
-  --bg-input:   #0D1117;   /* form fields sit on canvas level */
+  /* Surface layers */
+  --bg-base:    #0a0a0b;
+  --bg-surface: #111113;
+  --bg-raised:  #18181b;
+  --bg-overlay: #1e1e22;
+  --bg-hover:   #232329;
+  --bg-input:   #141416;
 
-  /* ─ Borders ──────────────────────────────────────────────────────────── */
-  --border:       #30363D;   /* default 1px divider */
-  --border-muted: #21262D;   /* very subtle, inside cards */
-  --border-light: #3D4451;   /* emphasized / hover */
-  --border-focus: #2563EB;   /* input focus ring */
+  /* Borders */
+  --border:       rgba(255, 255, 255, 0.06);
+  --border-subtle: rgba(255, 255, 255, 0.04);
+  --border-hover: rgba(255, 255, 255, 0.10);
+  --border-focus: #3b82f6;
 
-  /* ─ Accent (blue — used as connective tissue, not one isolated CTA) ─── */
-  --accent:         #2563EB;
-  --accent-hover:   #1D4ED8;
-  --accent-muted:   #1A3C6E;
-  --accent-glow:    rgba(37, 99, 235, 0.18);
-  --accent-subtle:  rgba(37, 99, 235, 0.08);
-  --accent-border:  rgba(37, 99, 235, 0.25);
+  /* Accent */
+  --accent:        #3b82f6;
+  --accent-hover:  #2563eb;
+  --accent-muted:  rgba(59, 130, 246, 0.15);
+  --accent-glow:   rgba(59, 130, 246, 0.12);
+  --accent-subtle: rgba(59, 130, 246, 0.06);
 
-  /* ─ Text hierarchy ───────────────────────────────────────────────────── */
-  --text-primary:   #E6EDF3;   /* headings, input values */
-  --text-secondary: #8B949E;   /* body, descriptions */
-  --text-muted:     #6E7681;   /* labels, hints, placeholders */
-  --text-code:      #79C0FF;   /* monospace inline code */
+  /* Text */
+  --text-primary:   #ececef;
+  --text-secondary: #a0a0ab;
+  --text-muted:     #787886;
+  --text-faint:     #5a5a66;
 
-  /* ─ Status ───────────────────────────────────────────────────────────── */
-  --success:        #3FB950;
-  --success-bg:     rgba(63, 185, 80, 0.08);
-  --success-border: rgba(63, 185, 80, 0.2);
-  --error:          #F85149;
-  --error-bg:       rgba(248, 81, 73, 0.08);
-  --error-border:   rgba(248, 81, 73, 0.25);
-  --warning:        #D29922;
-  --warning-bg:     rgba(210, 153, 34, 0.08);
-  --warning-border: rgba(210, 153, 34, 0.2);
+  /* Status */
+  --success:        #34d399;
+  --success-bg:     rgba(52, 211, 153, 0.08);
+  --success-border: rgba(52, 211, 153, 0.15);
+  --error:          #f87171;
+  --error-bg:       rgba(248, 113, 113, 0.06);
+  --error-border:   rgba(248, 113, 113, 0.15);
+  --warning:        #fbbf24;
+  --warning-bg:     rgba(251, 191, 36, 0.06);
+  --warning-border: rgba(251, 191, 36, 0.12);
 
-  /* ─ Layout ───────────────────────────────────────────────────────────── */
-  --sidebar-w: 240px;
-  --radius:    6px;     /* GitHub uses tighter radius than most design systems */
-  --radius-sm: 4px;
-  --radius-lg: 8px;
+  /* Layout */
+  --sidebar-w: 208px;
+  --content-max-w: 740px;
+  --radius: 8px;
+  --radius-sm: 6px;
+  --radius-lg: 12px;
   --radius-full: 9999px;
 
-  /* ─ Shadows ──────────────────────────────────────────────────────────── */
-  --shadow-card: 0 1px 3px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.15);
-  --shadow-overlay: 0 8px 24px rgba(0,0,0,0.4);
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.2);
+  --shadow-lg: 0 8px 30px rgba(0,0,0,0.35);
+
+  /* Motion System (Fast: 120-160ms, Normal: 180-240ms, Emphasis: 250-350ms) */
+  --duration-fast: 140ms;
+  --duration: 200ms;
+  --duration-slow: 300ms;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out: cubic-bezier(0.2, 0, 0, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* ── Reset ──────────────────────────────────────────────────────────────── */
+/* ── Reset ──────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
 
 body {
-  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 14px;
   line-height: 1.6;
   background: var(--bg-base);
@@ -69,128 +77,174 @@ body {
   min-height: 100vh;
   display: flex;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* ─ Inline code ─────────────────────────────────────────────────────────── */
 code {
-  font-family: "SF Mono", "Fira Code", ui-monospace, Consolas, monospace;
+  font-family: "SF Mono", "JetBrains Mono", ui-monospace, Consolas, monospace;
   font-size: 12px;
-  color: var(--text-code);
-  background: rgba(121, 192, 255, 0.05);
-  padding: 0.1em 0.4em;
-  border-radius: 3px;
-  border: 1px solid rgba(121, 192, 255, 0.08);
+  color: var(--text-secondary);
+  background: rgba(255,255,255,0.04);
+  padding: 0.15em 0.45em;
+  border-radius: 4px;
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════════
    SIDEBAR
-   ═══════════════════════════════════════════════════════════════════════════ */
+   ═══════════════════════════════════════════════════════════════ */
 .sidebar {
   position: fixed;
   top: 0; left: 0;
   width: var(--sidebar-w);
   height: 100vh;
-  background: var(--bg-raised);
+  background: var(--bg-surface);
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   z-index: 100;
   overflow-y: auto;
+  transition: transform var(--duration-slow) var(--ease);
 }
 
-/* ── Logo ────────────────────────────────────────────────────────────────── */
+/* ── Logo ────────────────────────────────────────────────────── */
 .sidebar-logo {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 16px 16px 14px;
-  border-bottom: 1px solid var(--border);
+  padding: 20px 16px 18px;
 }
 
 .logo-icon {
-  width: 20px; height: 20px;
+  width: 18px; height: 18px;
   color: var(--accent);
   flex-shrink: 0;
+  opacity: 0.9;
 }
 
 .logo-text {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--text-primary);
   letter-spacing: -0.01em;
 }
 
-/* ── Nav ─────────────────────────────────────────────────────────────────── */
+/* ── Nav ─────────────────────────────────────────────────────── */
 .sidebar-nav {
-  padding: 10px 8px;
+  padding: 8px 8px;
   flex: 1;
 }
 
-/* Optionally: small muted group label above nav items */
 .nav-group-label {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-faint);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  padding: 6px 10px 4px;
+  letter-spacing: 0.08em;
+  padding: 12px 10px 6px;
 }
 
 .nav-link {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 7px 10px;
-  /* GitHub active nav uses a left border, not a box border */
-  border-left: 2px solid transparent;
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
   color: var(--text-secondary);
   text-decoration: none;
   font-size: 13px;
-  font-weight: 500;
-  transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
-  margin-bottom: 1px;
+  font-weight: 450;
+  transition: color var(--duration-fast) var(--ease),
+              background var(--duration-fast) var(--ease),
+              box-shadow var(--duration-fast) var(--ease);
+  margin-bottom: 2px;
+  position: relative;
 }
 
 .nav-link svg {
   width: 15px; height: 15px;
   flex-shrink: 0;
-  opacity: 0.7;
-  transition: opacity 0.12s;
+  opacity: 0.55;
+  transition: transform var(--duration-fast) var(--ease),
+              opacity var(--duration-fast) var(--ease),
+              color var(--duration-fast) var(--ease);
 }
 
 .nav-link:hover {
   background: var(--bg-hover);
   color: var(--text-primary);
 }
-.nav-link:hover svg { opacity: 1; }
-
-/* Active: 2px left accent border + very subtle tint — the GitHub pattern */
-.nav-link.active {
-  background: var(--accent-subtle);
-  color: var(--accent);
-  border-left-color: var(--accent);
+.nav-link:hover svg {
+  opacity: 0.9;
+  transform: translateX(2px);
 }
-.nav-link.active svg { color: var(--accent); opacity: 1; }
 
-/* ── Sidebar footer callout ──────────────────────────────────────────────── */
+.nav-link.active {
+  background: var(--accent-muted);
+  color: var(--text-primary);
+  font-weight: 550;
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+.nav-link.active svg {
+  color: var(--accent);
+  opacity: 1;
+  transform: none;
+}
+
+/* ── Section nav (edit page) ─────────────────────────────────── */
+.section-nav {
+  padding: 4px 8px 8px;
+  display: none; /* shown by JS on edit page */
+}
+.section-nav.visible { display: block; }
+
+.section-nav-label {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 12px 10px 6px;
+}
+
+.section-nav-link {
+  display: block;
+  padding: 5px 10px;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 400;
+  transition: color var(--duration-fast) var(--ease),
+              background var(--duration-fast) var(--ease),
+              border-color var(--duration-fast) var(--ease),
+              padding-left var(--duration-fast) var(--ease);
+  cursor: pointer;
+  border-left: 2px solid transparent;
+  margin-left: 4px;
+}
+.section-nav-link:hover {
+  color: var(--text-secondary);
+  background: rgba(255,255,255,0.02);
+  padding-left: 12px;
+}
+.section-nav-link.active {
+  color: var(--text-primary);
+  border-left-color: var(--accent);
+  background: rgba(255,255,255,0.03);
+  font-weight: 500;
+}
+
+/* ── Sidebar footer ──────────────────────────────────────────── */
 .sidebar-footer {
   padding: 12px 12px 16px;
   border-top: 1px solid var(--border);
 }
 
-/*
-  GitHub-style info callout box: subtly bordered, icon + text,
-  replaces the plain paragraph that was there before.
-*/
 .data-callout {
-  background: var(--bg-nested);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
   padding: 10px 12px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
 
 .data-callout-header {
@@ -200,7 +254,7 @@ code {
 }
 
 .data-callout-dot {
-  width: 8px; height: 8px;
+  width: 6px; height: 6px;
   border-radius: var(--radius-full);
   flex-shrink: 0;
 }
@@ -208,210 +262,272 @@ code {
 .data-callout-dot-real    { background: var(--success); }
 
 .data-callout-label {
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 11px;
+  font-weight: 500;
   color: var(--text-secondary);
 }
 
 .data-callout-body {
-  font-size: 11.5px;
-  color: var(--text-muted);
-  line-height: 1.55;
-}
-
-/* Legacy support — keep old badge classes in case of partial render */
-.data-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
   font-size: 11px;
-  font-weight: 600;
-  padding: 2px 8px;
-  border-radius: var(--radius-full);
-  margin-bottom: 5px;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
+  color: var(--text-muted);
+  line-height: 1.5;
 }
-.data-badge-example { background: var(--warning-bg); color: var(--warning); }
-.data-badge-real    { background: var(--success-bg); color: var(--success); }
-.data-hint { font-size: 11.5px; color: var(--text-muted); line-height: 1.5; }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   MAIN CONTENT AREA
-   ═══════════════════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════
+   MAIN CONTENT
+   ═══════════════════════════════════════════════════════════════ */
 .main {
   margin-left: var(--sidebar-w);
   flex: 1;
-  padding: 0 40px 64px;
-  max-width: calc(880px + var(--sidebar-w));
+  padding: 0 48px 80px;
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-/* ── Page header band ────────────────────────────────────────────────────── */
-/*
-  GitHub's page header: title+subtitle on the left, primary CTA on the right,
-  the whole band sits in a clearly separated horizontal strip with a bottom border.
-  We push it full-bleed within the main content column.
-*/
+.main > * {
+  width: 100%;
+  max-width: var(--content-max-w);
+}
+
+/* ── Page header ─────────────────────────────────────────────── */
 .page-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  padding: 20px 0 18px;
-  margin-bottom: 24px;
-  border-bottom: 1px solid var(--border);
+  padding: 36px 0 28px;
+  margin-bottom: 8px;
 }
 
 .page-title {
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 600;
   color: var(--text-primary);
-  letter-spacing: -0.015em;
-  line-height: 1.25;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
 }
 
 .page-subtitle {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-muted);
-  margin-top: 2px;
+  margin-top: 4px;
+  font-weight: 400;
 }
 
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-shrink: 0;
-}
-
-.save-status {
-  font-size: 12px;
-  font-weight: 500;
-  transition: opacity 0.3s;
-}
-.save-status.status-success { color: var(--success); }
-.save-status.status-error   { color: var(--error); }
-
-/* ── Error / validation banner ───────────────────────────────────────────── */
+/* ── Error banner ────────────────────────────────────────────── */
 .error-banner {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
+  gap: 10px;
   background: var(--error-bg);
   border: 1px solid var(--error-border);
   border-radius: var(--radius);
-  padding: 10px 14px;
-  margin-bottom: 20px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
   color: var(--error);
   font-size: 13px;
   line-height: 1.5;
+  animation: slideDown var(--duration) var(--ease-out);
 }
 .error-banner svg { flex-shrink: 0; margin-top: 1px; }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   FORM SECTIONS  — surface level 2 (raised panels)
-   ═══════════════════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════
+   STICKY SAVE BAR
+   ═══════════════════════════════════════════════════════════════ */
+.save-bar {
+  position: fixed;
+  bottom: 0;
+  left: var(--sidebar-w);
+  right: 0;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 48px;
+  pointer-events: none;
+  transform: translateY(100%);
+  opacity: 0;
+  transition: transform var(--duration-slow) var(--ease),
+              opacity var(--duration) var(--ease);
+}
+.save-bar.visible {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.save-bar-inner {
+  width: 100%;
+  max-width: var(--content-max-w);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-bottom: none;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  padding: 10px 20px;
+  box-shadow: 0 -4px 24px rgba(0,0,0,0.3);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.save-status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.save-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+  transition: background var(--duration) var(--ease),
+              box-shadow var(--duration) var(--ease),
+              transform var(--duration-fast) var(--ease);
+}
+
+.dot-unsaved {
+  background: var(--warning);
+  box-shadow: 0 0 6px rgba(251, 191, 36, 0.4);
+}
+
+.dot-saving {
+  background: var(--accent);
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
+  animation: pulseDot 1s infinite alternate ease-in-out;
+}
+
+.dot-saved {
+  background: var(--success);
+  box-shadow: 0 0 6px rgba(52, 211, 153, 0.4);
+}
+
+@keyframes pulseDot {
+  from { transform: scale(0.85); opacity: 0.7; }
+  to   { transform: scale(1.15); opacity: 1; }
+}
+
+.save-bar-text {
+  font-size: 13px;
+  font-weight: 450;
+  color: var(--text-secondary);
+  transition: color var(--duration) var(--ease),
+              opacity var(--duration-fast) var(--ease);
+}
+.save-bar-text.status-saved {
+  color: var(--success);
+}
+.save-bar-text.status-saving {
+  color: var(--accent);
+}
+.save-bar-text.status-unsaved {
+  color: var(--text-secondary);
+}
+
+.save-bar .btn {
+  pointer-events: auto;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   FORM SECTIONS — Clean, typography-driven
+   ═══════════════════════════════════════════════════════════════ */
 .sections-container {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 0;
 }
 
 .form-section {
-  background: var(--bg-raised);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 8px;
+  scroll-margin-top: 24px;
 }
+.form-section:last-child { border-bottom: none; }
 
-/* ── Section header ──────────────────────────────────────────────────────── */
+/* ── Section header — elegant, no icon squares ──────────────── */
 .section-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--border);
-  /* Sits on the same surface level as the card itself, not darker */
-  background: transparent;
+  padding: 20px 0 8px;
+  cursor: pointer;
+  user-select: none;
+  transition: opacity var(--duration-fast) var(--ease);
+}
+.section-header:hover { opacity: 0.85; }
+.section-header:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+  border-radius: var(--radius-sm);
 }
 
 .section-title {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-/*
-  Icon swatch: small rounded square with a very faint accent tint,
-  the section icon sits inside it — similar to GitHub's repo/org icon treatment.
-*/
-.section-icon-swatch {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px; height: 28px;
-  background: var(--accent-subtle);
-  border: 1px solid var(--accent-border);
-  border-radius: var(--radius-sm);
-  flex-shrink: 0;
-}
-.section-icon-swatch svg { color: var(--accent); }
-
-/* Count pill — GitHub style: no border, muted bg, monospace number */
-.count-badge {
-  font-size: 11px;
-  font-weight: 600;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
   color: var(--text-muted);
-  background: var(--bg-nested);
-  padding: 1px 7px;
-  border-radius: var(--radius-full);
-  min-width: 20px;
-  text-align: center;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.section-count {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-faint);
   font-variant-numeric: tabular-nums;
 }
 
-.section-content { padding: 14px 16px; }
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   ENTRY CARDS  — surface level 3 (cards inside sections)
-   ═══════════════════════════════════════════════════════════════════════════ */
-.entry-card {
-  background: var(--bg-overlay);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  margin-bottom: 10px;
-  overflow: hidden;
-  transition: border-color 0.15s, box-shadow 0.15s;
-}
-.entry-card:hover {
-  border-color: var(--border-light);
-  box-shadow: var(--shadow-card);
-}
-.entry-card:last-child { margin-bottom: 0; }
-
-.card-header {
+.section-actions {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 9px 12px;
-  background: rgba(255,255,255,0.015);
-  border-bottom: 1px solid var(--border-muted);
+  gap: 8px;
 }
 
-.card-title {
-  font-size: 12.5px;
-  font-weight: 600;
+.section-chevron {
+  width: 14px; height: 14px;
+  color: var(--text-faint);
+  transition: transform var(--duration) var(--ease),
+              color var(--duration-fast) var(--ease);
+  flex-shrink: 0;
+}
+.section-header:hover .section-chevron {
   color: var(--text-secondary);
 }
+.section-header.collapsed .section-chevron {
+  transform: rotate(-90deg);
+}
 
-.card-body { padding: 12px; }
+/* ── Section content — animated expand/collapse ─────────────── */
+.section-body {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows var(--duration-slow) var(--ease);
+}
+.section-body.collapsed {
+  grid-template-rows: 0fr;
+}
+.section-body-inner {
+  overflow: hidden;
+  min-height: 0;
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity var(--duration) var(--ease),
+              transform var(--duration) var(--ease);
+}
+.section-body.collapsed .section-body-inner {
+  opacity: 0;
+  transform: translateY(-4px);
+}
 
-/* ═══════════════════════════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════════
    FORM FIELDS
-   ═══════════════════════════════════════════════════════════════════════════ */
-.fields-grid { display: grid; gap: 12px; }
+   ═══════════════════════════════════════════════════════════════ */
+.fields-grid { display: grid; gap: 14px; }
 .fields-grid-1 { grid-template-columns: 1fr; }
 .fields-grid-2 { grid-template-columns: 1fr 1fr; }
 .fields-grid-3 { grid-template-columns: 1fr 1fr 1fr; }
@@ -419,306 +535,886 @@ code {
 .field-group {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 5px;
 }
 .field-group.span-2 { grid-column: span 2; }
 
-/* GitHub field label: uppercase, tracked, small, muted */
 label {
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--text-muted);
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
   text-transform: uppercase;
 }
 
 .req { color: var(--error); margin-left: 2px; text-transform: none; }
 
 .field-hint {
-  font-size: 11.5px;
-  color: var(--text-muted);
-  line-height: 1.5;
+  font-size: 11px;
+  color: var(--text-faint);
+  line-height: 1.45;
   margin-top: 2px;
   text-transform: none;
   font-weight: 400;
   letter-spacing: 0;
 }
-.field-hint-warn { color: var(--warning); }
+.field-hint-warn { color: var(--warning); opacity: 0.8; }
 
-/* ── Text inputs ─────────────────────────────────────────────────────────── */
+/* ── Inputs ──────────────────────────────────────────────────── */
 .field-input {
   background: var(--bg-input);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   color: var(--text-primary);
   font-family: inherit;
-  font-size: 13.5px;
-  padding: 6px 10px;
+  font-size: 13px;
+  padding: 8px 11px;
   width: 100%;
   outline: none;
-  transition: border-color 0.12s, box-shadow 0.12s;
+  transition: border-color var(--duration-fast) var(--ease),
+              box-shadow var(--duration-fast) var(--ease),
+              background var(--duration-fast) var(--ease);
 }
-.field-input::placeholder { color: var(--text-muted); }
+.field-input::placeholder { color: var(--text-faint); }
 
-/* Hover: barely perceptible, just brightens the border */
-.field-input:hover:not(:focus) { border-color: var(--border-light); }
+.field-input:hover:not(:focus) {
+  border-color: var(--border-hover);
+  background: var(--bg-raised);
+}
 
-/* Focus: obvious accent ring — the GitHub pattern */
 .field-input:focus {
   border-color: var(--border-focus);
-  box-shadow: 0 0 0 3px var(--accent-glow);
+  box-shadow: 0 0 0 2px var(--accent-glow);
+  background: var(--bg-raised);
 }
 
-/* Validation error state */
 .field-input.field-invalid {
   border-color: var(--error);
-  box-shadow: 0 0 0 3px rgba(248, 81, 73, 0.12);
+  box-shadow: 0 0 0 2px rgba(248, 113, 113, 0.1);
 }
 .field-error {
-  font-size: 11.5px;
+  font-size: 11px;
   color: var(--error);
   margin-top: 2px;
-  font-weight: 500;
+  font-weight: 450;
 }
 
 textarea.field-input {
   resize: vertical;
-  min-height: 68px;
-  line-height: 1.5;
+  min-height: 60px;
+  line-height: 1.55;
 }
 
-/* Select — custom chevron, disabled muted */
+/* Select */
 .select-input {
   cursor: pointer;
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236E7681' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2363636e' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 10px center;
   padding-right: 30px;
 }
-.select-input:disabled { opacity: 0.45; cursor: not-allowed; }
+.select-input:disabled { opacity: 0.35; cursor: not-allowed; }
 .select-input option { background: var(--bg-overlay); }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   NESTED / SUB-SECTION ITEMS  — surface level 4 (inside entry cards)
-   Visual hierarchy: recessed bg + thin left accent line, tighter padding
-   ═══════════════════════════════════════════════════════════════════════════ */
-.sub-section {
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid var(--border-muted);
+/* ═══════════════════════════════════════════════════════════════
+   TAG CHIPS
+   ═══════════════════════════════════════════════════════════════ */
+.tag-chips-container {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
-.sub-header {
+.tag-chips-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  align-items: center;
+  min-height: 28px;
+  padding: 2px 0;
+}
+
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: var(--accent-muted);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 7px;
+  border-radius: var(--radius-full);
+  transition: all var(--duration-fast) var(--ease);
+  animation: chipIn var(--duration-fast) var(--ease-out);
+  cursor: default;
+  max-width: 180px;
+}
+
+.tag-chip-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tag-chip-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 13px; height: 13px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 11px;
+  cursor: pointer;
+  border-radius: var(--radius-full);
+  transition: all var(--duration-fast) var(--ease);
+  padding: 0;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.tag-chip-remove:hover {
+  color: var(--error);
+  background: var(--error-bg);
+}
+
+.tag-input-inline {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 11px;
+  padding: 2px 2px;
+  min-width: 60px;
+  flex: 1;
+}
+.tag-input-inline::placeholder { color: var(--text-faint); }
+
+/* Hidden input that stores the real comma-separated value */
+.tag-hidden-input { display: none; }
+
+@keyframes chipIn {
+  from { opacity: 0; transform: scale(0.85); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ENTRY ROWS — Flat, scannable, no bordered cards
+   ═══════════════════════════════════════════════════════════════ */
+.entry-row {
+  position: relative;
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  transition: background var(--duration-fast) var(--ease),
+              border-color var(--duration-fast) var(--ease),
+              transform var(--duration-fast) var(--ease),
+              box-shadow var(--duration-fast) var(--ease);
+  margin-bottom: 2px;
+}
+.entry-row:hover {
+  background: rgba(255,255,255,0.02);
+  border-color: var(--border-subtle);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+/* ── Entry header (always visible) ────────────────────────────── */
+.entry-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 8px;
+  cursor: pointer;
+  user-select: none;
+  border-radius: var(--radius);
+  position: relative;
+  transition: color var(--duration-fast) var(--ease);
+}
+.entry-header:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+}
+
+.entry-expand-indicator {
+  width: 16px; height: 16px;
+  flex-shrink: 0;
+  color: var(--text-faint);
+  transition: transform var(--duration) var(--ease),
+              color var(--duration-fast) var(--ease);
+}
+.entry-header:hover .entry-expand-indicator {
+  color: var(--text-muted);
+}
+.entry-row.expanded .entry-expand-indicator {
+  transform: rotate(90deg);
+  color: var(--text-secondary);
+}
+
+.entry-meta {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.entry-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.entry-subtitle {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 400;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Three-dot menu ─────────────────────────────────────────── */
+.entry-menu-btn {
+  width: 24px; height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--text-faint);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease);
+  flex-shrink: 0;
+  opacity: 0;
+  font-size: 16px;
+  line-height: 1;
+  letter-spacing: 1px;
+}
+.entry-row:hover .entry-menu-btn,
+.entry-menu-btn.open {
+  opacity: 1;
+}
+.entry-menu-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-secondary);
+}
+
+/* Dropdown */
+.entry-menu-dropdown {
+  position: absolute;
+  right: 8px;
+  top: calc(100% + 4px);
+  background: var(--bg-overlay);
+  border: 1px solid var(--border-hover);
+  border-radius: var(--radius);
+  padding: 4px;
+  min-width: 140px;
+  box-shadow: var(--shadow-lg);
+  z-index: 60;
+  animation: menuIn var(--duration-fast) var(--ease-out);
+}
+
+.entry-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: none;
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 450;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  transition: all var(--duration-fast) var(--ease);
+}
+.entry-menu-item:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+.entry-menu-item.danger:hover {
+  background: var(--error-bg);
+  color: var(--error);
+}
+.entry-menu-item svg {
+  width: 13px; height: 13px;
+  flex-shrink: 0;
+}
+
+@keyframes menuIn {
+  from { opacity: 0; transform: translateY(-4px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ── Entry body (expandable) ──────────────────────────────────── */
+.entry-body {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--duration-slow) var(--ease);
+}
+.entry-row.expanded .entry-body {
+  grid-template-rows: 1fr;
+}
+.entry-body-inner {
+  overflow: hidden;
+  min-height: 0;
+  opacity: 0;
+  transform: translateY(-3px);
+  transition: opacity var(--duration) var(--ease),
+              transform var(--duration) var(--ease);
+}
+.entry-row.expanded .entry-body-inner {
+  opacity: 1;
+  transform: translateY(0);
+}
+.entry-body-content {
+  padding: 4px 8px 16px 36px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PERSONAL SECTION — no entry rows, just fields
+   ═══════════════════════════════════════════════════════════════ */
+.personal-fields {
+  padding: 4px 0 12px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   COMPACT BULLETS — inline, not card-based
+   ═══════════════════════════════════════════════════════════════ */
+.bullets-section {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.bullets-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 8px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 8px;
 }
 
-/* Small uppercase muted group label — mirrors GitHub's sidebar section labels */
-.sub-title {
-  font-size: 10.5px;
-  font-weight: 600;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-
-/*
-  Nested items (bullets, coursework, skill rows):
-  - recessed bg (nested level, darker than the card)
-  - thin 2px left border in accent color (subordinate but connected)
-  - tighter padding than outer card
-*/
-.bullet-card {
+.bullet-item {
   display: flex;
   gap: 8px;
   align-items: flex-start;
-  background: var(--bg-nested);
-  border: 1px solid var(--border-muted);
-  border-left: 2px solid var(--accent-muted);
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  padding: 8px 10px;
-  margin-bottom: 6px;
-  transition: border-left-color 0.15s;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border-subtle);
+  position: relative;
+  transition: background var(--duration-fast) var(--ease);
 }
-.bullet-card:hover { border-left-color: var(--accent); }
-.bullet-card:last-child { margin-bottom: 0; }
+.bullet-item:last-of-type { border-bottom: none; }
+.bullet-item:hover { background: rgba(255,255,255,0.01); }
 
-.bullet-fields { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+.bullet-marker {
+  width: 4px; height: 4px;
+  border-radius: var(--radius-full);
+  background: var(--text-faint);
+  flex-shrink: 0;
+  margin-top: 12px;
+}
 
-/* Category name inline edit for skills — underline style */
-.category-name-input {
+.bullet-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bullet-textarea {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 13px;
+  padding: 5px 8px;
+  width: 100%;
+  outline: none;
+  line-height: 1.5;
+  resize: vertical;
+  min-height: 32px;
+  transition: border-color var(--duration-fast) var(--ease),
+              box-shadow var(--duration-fast) var(--ease),
+              background var(--duration-fast) var(--ease);
+}
+.bullet-textarea::placeholder { color: var(--text-faint); }
+.bullet-textarea:hover {
+  border-color: var(--border);
+  background: var(--bg-input);
+}
+.bullet-textarea:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 2px var(--accent-glow);
+  background: var(--bg-input);
+}
+
+.bullet-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 0 8px;
+}
+
+.bullet-meta .tag-chips-wrapper {
+  min-height: 22px;
+  gap: 4px;
+}
+
+.bullet-priority {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--text-faint);
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.bullet-priority input {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 11px;
+  width: 28px;
+  padding: 2px 4px;
+  text-align: center;
+  outline: none;
+  transition: all var(--duration-fast) var(--ease);
+}
+.bullet-priority input:hover {
+  border-color: var(--border);
+  background: var(--bg-input);
+}
+.bullet-priority input:focus {
+  border-color: var(--border-focus);
+  background: var(--bg-input);
+}
+
+.bullet-delete {
   background: transparent;
   border: none;
-  border-bottom: 1px solid var(--border);
+  color: var(--text-faint);
+  cursor: pointer;
+  font-size: 11px;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: all var(--duration-fast) var(--ease);
+  opacity: 0;
+  flex-shrink: 0;
+}
+.bullet-item:hover .bullet-delete { opacity: 1; }
+.bullet-delete:hover {
+  color: var(--error);
+  background: var(--error-bg);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   COMPACT COURSEWORK — flat rows
+   ═══════════════════════════════════════════════════════════════ */
+.coursework-section {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.coursework-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cw-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.02);
+}
+.cw-row:last-of-type { border-bottom: none; }
+
+.cw-name {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 13px;
+  padding: 4px 8px;
+  width: 200px;
+  flex-shrink: 0;
+  outline: none;
+  transition: all var(--duration-fast) var(--ease);
+}
+.cw-name::placeholder { color: var(--text-faint); }
+.cw-name:hover { border-color: var(--border); background: var(--bg-input); }
+.cw-name:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 2px var(--accent-glow);
+  background: var(--bg-input);
+}
+
+.cw-tags {
+  flex: 1;
+  min-width: 0;
+}
+.cw-tags .tag-chips-wrapper { min-height: 24px; }
+.cw-tags label { display: none; }
+
+.cw-remove {
+  background: transparent;
+  border: none;
+  color: var(--text-faint);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: all var(--duration-fast) var(--ease);
+  opacity: 0;
+  flex-shrink: 0;
+}
+.cw-row:hover .cw-remove { opacity: 1; }
+.cw-remove:hover {
+  color: var(--error);
+  background: var(--error-bg);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   COMPACT SKILLS — category heading + chip flow
+   ═══════════════════════════════════════════════════════════════ */
+.skill-category {
+  margin-bottom: 16px;
+  position: relative;
+}
+.skill-category:last-child { margin-bottom: 0; }
+
+.skill-cat-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.skill-cat-name {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid transparent;
   border-radius: 0;
   color: var(--text-primary);
   font-family: inherit;
   font-size: 13px;
-  font-weight: 600;
-  padding: 2px 4px;
-  width: 160px;
+  font-weight: 500;
+  padding: 2px 0;
   outline: none;
-  transition: border-color 0.12s;
+  transition: border-color var(--duration-fast) var(--ease);
+  flex: 1;
+  min-width: 0;
 }
-.category-name-input:focus { border-color: var(--border-focus); }
+.skill-cat-name:hover { border-bottom-color: var(--border-hover); }
+.skill-cat-name:focus { border-bottom-color: var(--border-focus); }
 
-/* Skill row: name / tags / remove — same recessed treatment */
-.skill-item {
-  display: grid;
-  grid-template-columns: 1fr 1fr auto;
-  gap: 8px;
-  align-items: end;
-  margin-bottom: 5px;
+.skill-cat-remove {
+  background: transparent;
+  border: none;
+  color: var(--text-faint);
+  cursor: pointer;
+  font-size: 11px;
+  padding: 3px 6px;
+  border-radius: 4px;
+  transition: all var(--duration-fast) var(--ease);
+  opacity: 0;
+  flex-shrink: 0;
 }
-.skill-item:last-child { margin-bottom: 0; }
+.skill-category:hover .skill-cat-remove { opacity: 1; }
+.skill-cat-remove:hover {
+  color: var(--error);
+  background: var(--error-bg);
+}
 
-.tags-input { font-size: 12.5px; }
+.skill-chips-flow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   BUTTONS — three distinct variants
-   ═══════════════════════════════════════════════════════════════════════════ */
+.skill-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 450;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  transition: all var(--duration-fast) var(--ease);
+  cursor: default;
+  position: relative;
+}
+.skill-chip:hover {
+  border-color: var(--border-hover);
+  background: var(--bg-hover);
+}
+
+.skill-chip-remove {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 14px; height: 14px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 11px;
+  cursor: pointer;
+  border-radius: var(--radius-full);
+  padding: 0;
+  line-height: 1;
+  transition: all var(--duration-fast) var(--ease);
+}
+.skill-chip:hover .skill-chip-remove { display: inline-flex; }
+.skill-chip-remove:hover { color: var(--error); }
+
+.skill-chip-tags {
+  display: flex;
+  gap: 3px;
+  margin-left: 2px;
+}
+.skill-chip-tag {
+  font-size: 9px;
+  background: var(--accent-muted);
+  color: var(--text-muted);
+  padding: 1px 5px;
+  border-radius: var(--radius-full);
+  font-weight: 500;
+}
+
+.skill-add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  background: transparent;
+  border: 1px dashed var(--border);
+  color: var(--text-faint);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 450;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease);
+}
+.skill-add-btn:hover {
+  color: var(--accent);
+  border-color: rgba(59,130,246,0.3);
+  background: var(--accent-subtle);
+  border-style: solid;
+}
+
+/* Inline skill editor (appears when adding/editing a skill) */
+.skill-inline-editor {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-focus);
+  border-radius: var(--radius-full);
+  padding: 3px 8px;
+  box-shadow: 0 0 0 2px var(--accent-glow);
+  animation: chipIn var(--duration-fast) var(--ease-out);
+}
+.skill-inline-editor input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 12px;
+  width: 100px;
+  padding: 1px 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BUTTONS
+   ═══════════════════════════════════════════════════════════════ */
 .btn {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
   font-family: inherit;
   font-size: 13px;
   font-weight: 500;
-  padding: 6px 14px;
+  padding: 7px 16px;
   border-radius: var(--radius-sm);
   border: 1px solid transparent;
   cursor: pointer;
-  transition: background 0.12s, border-color 0.12s, box-shadow 0.12s, opacity 0.12s;
+  transition: background var(--duration-fast) var(--ease),
+              border-color var(--duration-fast) var(--ease),
+              color var(--duration-fast) var(--ease),
+              box-shadow var(--duration-fast) var(--ease),
+              transform var(--duration-fast) var(--ease),
+              filter var(--duration-fast) var(--ease),
+              opacity var(--duration-fast) var(--ease);
   text-decoration: none;
   white-space: nowrap;
   line-height: 1.4;
+  user-select: none;
 }
-.btn:disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+.btn:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+  pointer-events: none;
+  transform: none !important;
+}
 
-/* ── Primary: solid accent fill — Save Changes ───────────────────────────── */
+.btn.is-loading {
+  cursor: wait;
+}
+
+.btn svg {
+  transition: transform var(--duration-fast) var(--ease);
+}
+
+/* Primary */
 .btn-primary {
   background: var(--accent);
   color: #fff;
-  border-color: var(--accent);
-  font-weight: 600;
+  font-weight: 550;
 }
 .btn-primary:hover:not(:disabled) {
   background: var(--accent-hover);
-  border-color: var(--accent-hover);
-  box-shadow: 0 0 0 3px var(--accent-glow);
+  filter: brightness(1.04);
+  box-shadow: 0 0 0 2px var(--accent-glow);
+  transform: translateY(-1px);
+}
+.btn-primary:active:not(:disabled) {
+  transform: translateY(0) scale(0.99);
+  filter: brightness(0.96);
 }
 
-/* ── Secondary / outline: Generate & Download, Push to Remote ───────────── */
+/* Secondary */
 .btn-secondary {
-  background: transparent;
-  color: var(--text-primary);
-  border-color: var(--border-light);
+  background: var(--bg-raised);
+  color: var(--text-secondary);
+  border-color: var(--border);
 }
 .btn-secondary:hover:not(:disabled) {
   background: var(--bg-hover);
-  border-color: var(--border-focus);
-  color: var(--accent);
+  color: var(--text-primary);
+  border-color: var(--border-hover);
+  transform: translateY(-1px);
+}
+.btn-secondary:active:not(:disabled) {
+  background: var(--bg-surface);
+  transform: translateY(0);
 }
 
-/* Large variant */
-.btn-lg { padding: 8px 18px; font-size: 14px; font-weight: 600; }
+/* Large */
+.btn-lg { padding: 9px 20px; font-size: 14px; font-weight: 550; }
 
-/* ── Outline add entry — "+ Add Entry" in section headers ───────────────── */
-/*
-  Not the accent-filled style — this is a secondary/outline button
-  that uses accent color for text only, hover gets a faint tint.
-*/
+/* Ghost add button — used in section headers */
 .btn-add {
   font-size: 12px;
-  padding: 4px 10px;
+  padding: 3px 10px;
   background: transparent;
-  color: var(--text-secondary);
-  border: 1px solid var(--border);
+  color: var(--text-muted);
+  border: none;
   border-radius: var(--radius-sm);
   cursor: pointer;
   font-family: inherit;
-  font-weight: 500;
-  transition: color 0.12s, border-color 0.12s, background 0.12s;
+  font-weight: 450;
+  transition: color var(--duration-fast) var(--ease),
+              background var(--duration-fast) var(--ease),
+              transform var(--duration-fast) var(--ease);
 }
 .btn-add:hover {
   color: var(--accent);
-  border-color: var(--accent-border);
   background: var(--accent-subtle);
+  transform: translateX(1px);
+}
+.btn-add:active {
+  transform: translateX(0);
 }
 
-/* ── Sub-level add — "+ Add Bullet", "+ Add Course" ─────────────────────── */
-.btn-add-sub {
+/* Sub-level add */
+.btn-add-inline {
   font-size: 11px;
   padding: 3px 8px;
   background: transparent;
-  color: var(--text-muted);
-  border: 1px solid var(--border-muted);
-  border-radius: var(--radius-sm);
+  color: var(--text-faint);
+  border: none;
   cursor: pointer;
   font-family: inherit;
-  font-weight: 500;
-  transition: color 0.12s, border-color 0.12s, background 0.12s;
+  font-weight: 450;
+  transition: color var(--duration-fast) var(--ease),
+              transform var(--duration-fast) var(--ease);
 }
-.btn-add-sub:hover {
+.btn-add-inline:hover {
   color: var(--accent);
-  border-color: var(--accent-border);
-  background: var(--accent-subtle);
+  transform: translateX(1px);
+}
+.btn-add-inline:active {
+  transform: translateX(0);
 }
 
-/* ── Ghost / icon-only: close/remove (×) buttons ────────────────────────── */
-/*
-  No border at all in the default state. Hover shows only a background tint.
-  This is GitHub's icon button pattern.
-*/
-.btn-remove {
-  background: transparent;
-  color: var(--text-muted);
-  border: none;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  font-size: 14px;
-  padding: 3px 6px;
-  font-family: inherit;
-  transition: color 0.12s, background 0.12s;
-  line-height: 1;
-}
-.btn-remove:hover {
-  color: var(--error);
-  background: var(--error-bg);
+/* ═══════════════════════════════════════════════════════════════
+   EMPTY STATES
+   ═══════════════════════════════════════════════════════════════ */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 20px;
+  text-align: center;
+  gap: 4px;
 }
 
-.btn-remove-small {
-  background: transparent;
-  color: var(--text-muted);
-  border: none;
-  cursor: pointer;
+.empty-state-title {
   font-size: 13px;
-  padding: 2px 5px;
-  border-radius: var(--radius-sm);
-  font-family: inherit;
-  flex-shrink: 0;
-  transition: color 0.12s, background 0.12s;
-  align-self: flex-start;
-  margin-top: 1px;
-  line-height: 1.4;
-}
-.btn-remove-small:hover {
-  color: var(--error);
-  background: var(--error-bg);
+  color: var(--text-muted);
+  font-weight: 400;
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
+.empty-state .btn-add {
+  margin-top: 8px;
+  border: 1px dashed var(--border);
+  padding: 4px 12px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
    CHECKBOXES
-   ═══════════════════════════════════════════════════════════════════════════ */
+   ═══════════════════════════════════════════════════════════════ */
 .checkbox-group { margin-top: 2px; }
 
 .checkbox-label {
   display: flex;
   align-items: flex-start;
-  gap: 9px;
+  gap: 10px;
   cursor: pointer;
 }
 
@@ -742,75 +1438,181 @@ textarea.field-input {
 }
 
 .checkbox-hint {
-  font-size: 11.5px;
+  font-size: 11px;
   color: var(--text-muted);
   font-weight: 400;
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════════
    GENERATE PAGE
-   ═══════════════════════════════════════════════════════════════════════════ */
-.generate-layout {
+   ═══════════════════════════════════════════════════════════════ */
+.generate-workspace {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  max-width: 660px;
+  gap: 20px;
+  width: 100%;
 }
 
-/* Gen cards use the same raised surface as form sections */
-.gen-card {
-  background: var(--bg-raised);
+/* ── Primary Workflow Card ───────────────────────────────────── */
+.workflow-card {
+  background: var(--bg-surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 0;
-  overflow: hidden;
+  padding: 24px 28px;
+  box-shadow: var(--shadow-sm);
+  transition: border-color var(--duration) var(--ease);
+}
+.workflow-card:hover {
+  border-color: var(--border-hover);
 }
 
-.gen-card-title {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 14px;
+.workflow-header {
+  padding-bottom: 16px;
+  margin-bottom: 22px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.workflow-title {
+  font-size: 15px;
   font-weight: 600;
   color: var(--text-primary);
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 0;
+  letter-spacing: -0.015em;
+  margin: 0;
 }
-.gen-card-title svg { color: var(--accent); }
 
-/* Icon swatch inside gen card title */
-.gen-card-icon-swatch {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 26px; height: 26px;
-  background: var(--accent-subtle);
-  border: 1px solid var(--accent-border);
-  border-radius: var(--radius-sm);
-  flex-shrink: 0;
-}
-.gen-card-icon-swatch svg { color: var(--accent); }
-
-.gen-card-body {
-  padding: 16px;
+.workflow-form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
 }
 
-.gen-card .field-group { margin-bottom: 0; }
+.field-label-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.field-label-row .field-label {
+  margin-bottom: 0;
+}
 
-.form-actions { margin-top: 4px; }
+/* Secondary Theme Field */
+.theme-field-group {
+  opacity: 0.85;
+}
+.theme-select {
+  cursor: not-allowed;
+  color: var(--text-muted);
+}
 
-/* Result callout areas */
+/* "Coming soon" badge */
+.badge-coming-soon {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--text-muted);
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  padding: 2px 7px;
+  border-radius: var(--radius-full);
+  vertical-align: middle;
+}
+
+/* Git Commit Secondary Group */
+.git-commit-group {
+  padding-top: 18px;
+  border-top: 1px solid var(--border-subtle);
+  margin-top: 2px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field-label-sub {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-faint);
+  margin-bottom: 4px;
+}
+
+.checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 13px;
+  font-weight: 450;
+  color: var(--text-secondary);
+  transition: color var(--duration-fast) var(--ease);
+}
+.checkbox-label:hover {
+  color: var(--text-primary);
+}
+
+.checkbox-label input[type="checkbox"] {
+  appearance: auto;
+  accent-color: var(--accent);
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+  margin: 0;
+}
+
+.checkbox-text {
+  font-size: 13px;
+  font-weight: 450;
+  color: var(--text-secondary);
+}
+.checkbox-label:hover .checkbox-text {
+  color: var(--text-primary);
+}
+
+/* Primary Action Button */
+.workflow-actions {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-generate {
+  padding: 10px 22px;
+  font-size: 13px;
+  font-weight: 550;
+  min-width: 160px;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-success {
+  background: var(--success);
+  color: #042f1a;
+  border-color: var(--success);
+  font-weight: 600;
+}
+.btn-success:hover:not(:disabled) {
+  background: #4ade80;
+  color: #042f1a;
+  box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.25);
+}
+
+.spin-icon {
+  animation: spin 0.8s linear infinite;
+}
+
+/* Result callout */
 .gen-result {
-  margin-top: 12px;
-  padding: 9px 13px;
+  margin-top: 14px;
+  padding: 10px 14px;
   border-radius: var(--radius-sm);
   font-size: 13px;
   line-height: 1.5;
   border: 1px solid transparent;
+  animation: fadeIn var(--duration) var(--ease-out);
 }
 .gen-result.result-success {
   background: var(--success-bg);
@@ -825,79 +1627,298 @@ textarea.field-input {
 .gen-result.result-info {
   background: var(--accent-subtle);
   color: var(--accent);
-  border-color: var(--accent-border);
 }
 
-/* Git push card — slightly distinguished */
-.git-card { border-color: var(--border-light); }
-
-.git-card-desc {
-  font-size: 13px;
-  color: var(--text-secondary);
-  line-height: 1.6;
-  margin-bottom: 0;
+/* ── Advanced Section: Git Remote ────────────────────────── */
+.advanced-section {
+  background: rgba(255, 255, 255, 0.015);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 18px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  transition: border-color var(--duration) var(--ease), background var(--duration) var(--ease);
+}
+.advanced-section:hover {
+  border-color: var(--border-hover);
+  background: rgba(255, 255, 255, 0.025);
 }
 
-/* ── Topic/language badge — "Coming soon" ────────────────────────────────── */
-.badge-coming-soon {
+.advanced-content {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.advanced-badge {
   font-size: 10px;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--warning);
-  background: var(--warning-bg);
-  border: 1px solid var(--warning-border);
-  padding: 1px 6px;
-  border-radius: var(--radius-full);
-  vertical-align: middle;
-  margin-left: 6px;
+  letter-spacing: 0.08em;
+  color: var(--text-faint);
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
+.advanced-title {
+  font-size: 13px;
+  font-weight: 550;
+  color: var(--text-secondary);
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.advanced-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.4;
+  margin: 0;
+}
+
+.btn-push {
+  font-size: 12px;
+  padding: 7px 16px;
+  flex-shrink: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════
    TOAST NOTIFICATIONS
-   ═══════════════════════════════════════════════════════════════════════════ */
+   ═══════════════════════════════════════════════════════════════ */
 .toast {
   position: fixed;
-  bottom: 20px; right: 20px;
-  min-width: 240px; max-width: 380px;
-  padding: 11px 15px;
+  bottom: 24px; right: 24px;
+  min-width: 180px; max-width: 360px;
+  padding: 11px 16px;
   border-radius: var(--radius);
   font-size: 13px;
   font-weight: 500;
-  box-shadow: var(--shadow-overlay);
+  box-shadow: var(--shadow-lg);
   z-index: 9999;
   opacity: 0;
-  transform: translateY(6px);
-  transition: opacity 0.2s, transform 0.2s;
+  transform: translateY(10px) scale(0.98);
+  transition: opacity var(--duration-slow) var(--ease),
+              transform var(--duration-slow) var(--ease);
   pointer-events: none;
   border: 1px solid transparent;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
 .toast.toast-show {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateY(0) scale(1);
   pointer-events: auto;
 }
-.toast.toast-success { background: var(--bg-overlay); color: var(--success); border-color: var(--success-border); }
-.toast.toast-error   { background: var(--bg-overlay); color: var(--error);   border-color: var(--error-border); }
-.toast.toast-info    { background: var(--bg-overlay); color: var(--accent);  border-color: var(--accent-border); }
+.toast.toast-success { background: rgba(17,17,19,0.92); color: var(--success); border-color: var(--success-border); }
+.toast.toast-error   { background: rgba(17,17,19,0.92); color: var(--error);   border-color: var(--error-border); }
+.toast.toast-info    { background: rgba(17,17,19,0.92); color: var(--accent);  border-color: rgba(59,130,246,0.2); }
 
-/* ═══════════════════════════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════════
+   MOBILE SIDEBAR OVERLAY
+   ═══════════════════════════════════════════════════════════════ */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(0,0,0,0.5);
+  z-index: 99;
+  opacity: 0;
+  transition: opacity var(--duration-slow) var(--ease);
+}
+.sidebar-overlay.show {
+  opacity: 1;
+}
+
+.mobile-menu-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px; height: 36px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 18px;
+  transition: all var(--duration-fast) var(--ease);
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 101;
+}
+.mobile-menu-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+/* ═══════════════════════════════════════════════════════════════
    SCROLLBAR
-   ═══════════════════════════════════════════════════════════════════════════ */
-::-webkit-scrollbar { width: 5px; height: 5px; }
+   ═══════════════════════════════════════════════════════════════ */
+::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: var(--radius-full); }
-::-webkit-scrollbar-thumb:hover { background: var(--border-light); }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.06); border-radius: var(--radius-full); }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.1); }
 
-/* ═══════════════════════════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════════
+   ANIMATIONS
+   ═══════════════════════════════════════════════════════════════ */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ═══════════════════════════════════════════════════════════════
    RESPONSIVE
-   ═══════════════════════════════════════════════════════════════════════════ */
-@media (max-width: 780px) {
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Narrower screens — reduce padding */
+@media (max-width: 1024px) {
+  .main { padding: 0 32px 64px; }
+  .save-bar { padding: 0 32px; }
+}
+
+/* Tablet — sidebar becomes drawer */
+@media (max-width: 768px) {
+  .mobile-menu-btn { display: flex; }
+
+  .sidebar {
+    transform: translateX(-100%);
+  }
+  .sidebar.open {
+    transform: translateX(0);
+    box-shadow: var(--shadow-lg);
+  }
+  .sidebar-overlay.show {
+    display: block;
+  }
+
+  .main {
+    margin-left: 0;
+    padding: 0 20px 48px;
+  }
+
+  .page-header {
+    padding-top: 56px;
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .save-bar {
+    left: 0;
+    padding: 0 20px;
+  }
+
   .fields-grid-2,
-  .fields-grid-3       { grid-template-columns: 1fr; }
-  .field-group.span-2  { grid-column: span 1; }
-  .skill-item          { grid-template-columns: 1fr auto; }
-  .skill-item .field-group:last-of-type { display: none; }
-  .main                { padding: 0 16px 48px; }
-  .page-header         { flex-direction: column; gap: 10px; align-items: flex-start; }
+  .fields-grid-3 { grid-template-columns: 1fr; }
+  .field-group.span-2 { grid-column: span 1; }
+
+  .cw-name { width: 140px; }
+  .entry-body-content { padding-left: 16px; }
+
+  /* Touch / tablet discovery for delete controls */
+  .bullet-delete { opacity: 0.7; }
+  .cw-remove { opacity: 0.7; }
+  .skill-chip-remove { display: inline-flex; opacity: 0.7; }
+}
+
+/* Small mobile */
+@media (max-width: 480px) {
+  .main { padding: 0 12px 40px; }
+  .page-title { font-size: 20px; }
+  .btn-lg { padding: 8px 14px; font-size: 13px; }
+  .workflow-card { padding: 18px 16px; }
+  .advanced-section { padding: 14px 16px; }
+  .save-bar { padding: 0 12px; }
+
+  .toast {
+    left: 12px; right: 12px;
+    min-width: unset;
+    max-width: unset;
+  }
+
+  .cw-row { flex-wrap: wrap; }
+  .cw-name { width: 100px; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   FOCUS VISIBLE — keyboard nav
+   ═══════════════════════════════════════════════════════════════ */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Remove default focus ring for mouse users */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ITEM ENTER & EXIT ANIMATIONS
+   ═══════════════════════════════════════════════════════════════ */
+@keyframes itemEnter {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes itemExit {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+    max-height: 400px;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-4px);
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    border-color: transparent;
+    overflow: hidden;
+  }
+}
+
+.item-enter {
+  animation: itemEnter var(--duration) var(--ease-out) forwards;
+}
+
+.item-exit {
+  animation: itemExit var(--duration-fast) var(--ease) forwards;
+  pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   REDUCED MOTION
+   ═══════════════════════════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

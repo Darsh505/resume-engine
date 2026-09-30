@@ -3,16 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}Resume Engine{% endblock %}</title>
-  <meta name="description" content="Local resume editor and PDF generator">
+  <title>{% block title %}Resume Studio{% endblock %}</title>
+  <meta name="description" content="A polished local resume-building studio for developers">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;450;500;550;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
 
-  <!-- ── Sidebar ─────────────────────────────────────────────────────────── -->
-  <aside class="sidebar">
+  <!-- Mobile menu button -->
+  <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Open navigation menu" onclick="toggleSidebar()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+      <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+    </svg>
+  </button>
+
+  <!-- Sidebar overlay (mobile) -->
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+  <!-- ── Sidebar ─────────────────────────────────────────────── -->
+  <aside class="sidebar" id="sidebar" role="navigation" aria-label="Main navigation">
 
     <!-- Logo -->
     <div class="sidebar-logo">
@@ -23,12 +34,12 @@
         <line x1="16" y1="17" x2="8" y2="17"/>
         <polyline points="10 9 9 9 8 9"/>
       </svg>
-      <span class="logo-text">Resume Engine</span>
+      <span class="logo-text">Resume Studio</span>
     </div>
 
-    <!-- Nav — group label + two nav links -->
+    <!-- Nav -->
     <nav class="sidebar-nav">
-      <p class="nav-group-label">Pages</p>
+      <p class="nav-group-label">Workspace</p>
       <a href="/" class="nav-link {% if request.url.path == '/' %}active{% endif %}">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
@@ -38,13 +49,19 @@
       </a>
       <a href="/generate" class="nav-link {% if request.url.path == '/generate' %}active{% endif %}">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/>
+          <line x1="16" y1="17" x2="8" y2="17"/>
         </svg>
         Generate PDF
       </a>
+
+      <!-- Section nav — populated by app.js on the edit page -->
+      <div class="section-nav" id="section-nav"></div>
     </nav>
 
-    <!-- Footer — GitHub-style bordered callout, not a plain paragraph -->
+    <!-- Footer -->
     <div class="sidebar-footer">
       {% if using_example %}
         <div class="data-callout">
@@ -53,8 +70,8 @@
             <span class="data-callout-label">Demo data</span>
           </div>
           <p class="data-callout-body">
-            Using <code>resume.example.yaml</code>.<br>
-            Save edits to create your own <code>resume.yaml</code>.
+            Using sample resume data.<br>
+            Save to create your own.
           </p>
         </div>
       {% else %}
@@ -63,20 +80,35 @@
             <span class="data-callout-dot data-callout-dot-real"></span>
             <span class="data-callout-label">Your data</span>
           </div>
-          <p class="data-callout-body">Editing <code>resume.yaml</code></p>
+          <p class="data-callout-body">Editing your resume</p>
         </div>
       {% endif %}
     </div>
 
   </aside>
 
-  <!-- ── Main ────────────────────────────────────────────────────────────── -->
-  <main class="main">
+  <!-- ── Main ────────────────────────────────────────────────── -->
+  <main class="main" role="main">
     {% block content %}{% endblock %}
   </main>
 
-  <!-- ── Toast ───────────────────────────────────────────────────────────── -->
-  <div id="toast" class="toast" aria-live="polite"></div>
+  <!-- ── Toast ───────────────────────────────────────────────── -->
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <!-- Mobile sidebar toggle -->
+  <script>
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('open');
+      document.getElementById('sidebar-overlay').classList.toggle('show');
+    }
+    function closeSidebar() {
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('sidebar-overlay').classList.remove('show');
+    }
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', closeSidebar);
+    });
+  </script>
 
 </body>
 </html>
